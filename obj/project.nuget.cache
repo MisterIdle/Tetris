@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "Ix10ErqoT1k=",
+  "dgSpecHash": "ns6pNi28EP0=",
   "success": true,
   "projectFilePath": "C:\\Users\\Alexy\\Desktop\\Tetris\\Tetris.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Alexy\\.nuget\\packages\\microsoft.toolkit.highperformance\\7.1.2\\microsoft.toolkit.highperformance.7.1.2.nupkg.sha512",
+    "C:\\Users\\Alexy\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
     "C:\\Users\\Alexy\\.nuget\\packages\\raylib-cslo\\4.2.0.9\\raylib-cslo.4.2.0.9.nupkg.sha512"
   ],
   "logs": []

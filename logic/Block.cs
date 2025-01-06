@@ -1,7 +1,7 @@
 using Raylib_CsLo;
 
 namespace Tetris {
-    class Block
+    public class Block
     {
         public int x;
         public int y;

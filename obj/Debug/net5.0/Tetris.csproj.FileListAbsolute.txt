@@ -27,3 +27,4 @@ C:\Users\Alexy\Desktop\Tetris\obj\Debug\net5.0\refint\Tetris.dll
 C:\Users\Alexy\Desktop\Tetris\obj\Debug\net5.0\Tetris.pdb
 C:\Users\Alexy\Desktop\Tetris\obj\Debug\net5.0\Tetris.genruntimeconfig.cache
 C:\Users\Alexy\Desktop\Tetris\obj\Debug\net5.0\ref\Tetris.dll
+C:\Users\Alexy\Desktop\Tetris\bin\Debug\net5.0\Newtonsoft.Json.dll

@@ -118,6 +118,21 @@ namespace Tetris
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE))
                 currentBlock.PlaceBlockAtBottom();
 
+            if (Raylib.IsKeyPressed(KeyboardKey.KEY_S))
+                Save.SaveGame(score, level, linesCleared, grid, colorGrid, currentBlock, nextBlock);
+
+            if (Raylib.IsKeyPressed(KeyboardKey.KEY_L))
+            {
+                SaveData saveData = Save.LoadGame();
+                score = saveData.Score;
+                level = saveData.Level;
+                linesCleared = saveData.LinesCleared;
+                grid = saveData.Grid;
+                colorGrid = saveData.ColorGrid;
+                currentBlock = saveData.CurrentBlock;
+                nextBlock = saveData.NextBlock;
+            }
+
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_R))
                 isRobotPlaying = !isRobotPlaying;
         }
