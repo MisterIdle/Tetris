@@ -1,3 +1,4 @@
+using System.Numerics;
 using Raylib_CsLo;
 
 namespace Tetris {
@@ -6,11 +7,11 @@ namespace Tetris {
         public int x;
         public int y;
 
+        private float fallTimer = 0.0f;
+        private float fallInterval = 1.0f;
+
         public int[,] shape;
         public Color color;
-
-        public float fallTimer = 0.0f;
-        public float fallInterval = 1.0f;
 
         public Block(int x, int y, int[,] shape, Color color)
         {
@@ -28,8 +29,7 @@ namespace Tetris {
                 {
                     if (shape[i, j] == 1)
                     {
-                        Raylib.DrawRectangle(GameLoop.MARGIN_X + (x + j) * GameLoop.CELL_SIZE, GameLoop.MARGIN_Y + (y + i) * GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, color);
-                        Raylib.DrawRectangleLines(GameLoop.MARGIN_X + (x + j) * GameLoop.CELL_SIZE, GameLoop.MARGIN_Y + (y + i) * GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, Raylib.DARKGRAY);
+                        DrawBlock(x + j, y + i, color);
                     }
                 }
             }
@@ -43,11 +43,34 @@ namespace Tetris {
                 {
                     if (shape[i, j] == 1)
                     {
-                        Raylib.DrawRectangle(x + j * GameLoop.CELL_SIZE, y + i * GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, color);
-                        Raylib.DrawRectangleLines(x + j * GameLoop.CELL_SIZE, y + i * GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, Raylib.DARKGRAY);
+                        DrawBlock(x + j, y + i, color);
                     }
                 }
             }
+        }
+
+        public void DrawPlacedBlocks()
+        {
+            for (int i = 0; i < GameLoop.GRID_HEIGHT; i++)
+            {
+                for (int j = 0; j < GameLoop.GRID_WIDTH; j++)
+                {
+                    if (GameLoop.grid[i, j] != 0)
+                    {
+                        DrawBlock(j, i, GameLoop.colorGrid[i, j]);
+                    }
+                }
+            }
+        }
+
+        public void DrawShadow()
+        {
+            Block shadowBlock = new Block(x, y, shape, GameLoop.shadowColor);
+            while (!shadowBlock.CheckCollision(shadowBlock.y + 1))
+            {
+                shadowBlock.y++;
+            }
+            shadowBlock.DrawTetromino();
         }
 
         public void MoveTetromino(int dx, int dy)
@@ -64,6 +87,30 @@ namespace Tetris {
                 y = prevY;
             }
         }
+
+        public void DrawBlock(int x, int y, Color color)
+        {
+            int drawX = GameLoop.MARGIN_X + x * GameLoop.CELL_SIZE;
+            int drawY = GameLoop.MARGIN_Y + y * GameLoop.CELL_SIZE;
+
+            Raylib.DrawRectangle(drawX + 3, drawY + 3, GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, Raylib.ColorAlpha(Raylib.BLACK, 0.5f));
+            Raylib.DrawRectangle(drawX, drawY, GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, color);
+
+            DrawBlockOutline(drawX, drawY);
+            DrawBlockLighting(drawX, drawY);
+        }
+
+        private void DrawBlockOutline(int drawX, int drawY)
+        {
+            Raylib.DrawRectangleLinesEx(new Rectangle(drawX, drawY, GameLoop.CELL_SIZE, GameLoop.CELL_SIZE), 3, Raylib.BLACK);
+        }
+
+        private void DrawBlockLighting(int drawX, int drawY)
+        {
+            Raylib.DrawRectangle(drawX + 3, drawY + 3, GameLoop.CELL_SIZE - 6, 3, Raylib.ColorAlpha(Raylib.WHITE, 0.3f));
+            Raylib.DrawRectangle(drawX + 3, drawY + 3, 3, GameLoop.CELL_SIZE - 6, Raylib.ColorAlpha(Raylib.WHITE, 0.3f));
+        }
+
 
         public void FallTetromino()
         {
