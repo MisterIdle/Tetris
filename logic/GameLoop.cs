@@ -19,13 +19,13 @@ namespace Tetris
 
         public static float deltaTime = 0.0f;
 
-        public List<Block> blocks;
-        public Block currentBlock;
-        public Block nextBlock;
+        public static List<Block> blocks;
+        public static Block currentBlock;
+        public static Block nextBlock;
 
         public GameLoop()
         {
-            blocks = Block.LoadFromJson("json/blocks.json");
+            blocks = new List<Block>();
             currentBlock = GenerateRandomBlock();
             nextBlock = GenerateRandomBlock();
         }
@@ -56,13 +56,11 @@ namespace Tetris
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_UP))
                 currentBlock.RotateTetromino();
 
-
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_LEFT))
                 currentBlock.MoveTetromino(-1, 0);
 
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_RIGHT))
                 currentBlock.MoveTetromino(1, 0);
-
 
             if (Raylib.IsKeyDown(KeyboardKey.KEY_DOWN))
                 currentBlock.SetFallSpeed(0.07f);
@@ -73,33 +71,38 @@ namespace Tetris
         public void Update()
         {
             currentBlock.FallTetromino();
-        
         }
 
         public void Draw()
         {
             DrawGrid();
+
+            foreach (var block in blocks)
+            {
+                block.DrawTetromino();
+            }
+
             currentBlock.DrawTetromino();
         }
 
         public void DrawGrid()
         {
-            for (int i = 0; i < GRID_WIDTH; i++)
+            for (int i = 0; i < GRID_HEIGHT; i++)
             {
-                for (int j = 0; j < GRID_HEIGHT; j++)
+                for (int j = 0; j < GRID_WIDTH; j++)
                 {
-                    Raylib.DrawRectangle(MARGIN_X + i * CELL_SIZE, MARGIN_Y + j * CELL_SIZE, CELL_SIZE, CELL_SIZE, Raylib.LIGHTGRAY);
-                    Raylib.DrawRectangleLines(MARGIN_X + i * CELL_SIZE, MARGIN_Y + j * CELL_SIZE, CELL_SIZE, CELL_SIZE, Raylib.DARKGRAY);
+                    Raylib.DrawRectangle(MARGIN_X + j * CELL_SIZE, MARGIN_Y + i * CELL_SIZE, CELL_SIZE, CELL_SIZE, Raylib.LIGHTGRAY);
+                    Raylib.DrawRectangleLines(MARGIN_X + j * CELL_SIZE, MARGIN_Y + i * CELL_SIZE, CELL_SIZE, CELL_SIZE, Raylib.DARKGRAY);
                 }
             }
         }
 
         // BLOCK GENERATION //
-        public Block GenerateRandomBlock()
+        public static Block GenerateRandomBlock()
         {
             Random random = new Random();
-            int index = random.Next(blocks.Count);
-            Block randomBlock = blocks[index];
+            int index = random.Next(Block.LoadFromJson("json/blocks.json").Count);
+            Block randomBlock = Block.LoadFromJson("json/blocks.json")[index];
 
             return new Block(GRID_WIDTH / 2 - randomBlock.shape.GetLength(1) / 2, 0, randomBlock.shape, randomBlock.color);
         }
@@ -142,7 +145,6 @@ namespace Tetris
         }
 
         // .NET 5.0 requires a conversion because [,] is not supported. (Developer note 😉)
-        // .NET 5.0 < 8.0
         private static int[,] ConvertTo2DArray(int[][] jaggedArray)
         {
             int rows = jaggedArray.Length;
@@ -198,12 +200,16 @@ namespace Tetris
             if (fallTimer >= fallInterval)
             {
                 y++;
-                fallTimer = 0.0f;
 
                 if (CheckCollision())
                 {
                     y--;
+                    LockTetromino();
+                    GameLoop.blocks.Add(this);
+                    GameLoop.currentBlock = GameLoop.GenerateRandomBlock();
                 }
+
+                fallTimer = 0.0f;
             }
         }
 
@@ -232,7 +238,6 @@ namespace Tetris
                 shape = prevShape;
             }
         }
-        
 
         // COLLISION DETECTION //
         public bool CheckCollision()
@@ -264,7 +269,78 @@ namespace Tetris
 
         private bool IsCellOccupied(int x, int y)
         {
+            foreach (var block in GameLoop.blocks)
+            {
+                for (int i = 0; i < block.shape.GetLength(0); i++)
+                {
+                    for (int j = 0; j < block.shape.GetLength(1); j++)
+                    {
+                        if (block.shape[i, j] == 1)
+                        {
+                            int blockX = block.x + j;
+                            int blockY = block.y + i;
+                            if (blockX == x && blockY == y)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
             return false;
+        }
+
+        public void LockTetromino()
+        {
+            GameLoop.blocks.Add(this);
+            ClearCompleteLines();
+        }
+
+        public void ClearCompleteLines()
+        {
+            for (int row = 0; row < GameLoop.GRID_HEIGHT; row++)
+            {
+                bool isLineComplete = true;
+
+                for (int col = 0; col < GameLoop.GRID_WIDTH; col++)
+                {
+                    if (IsCellOccupied(col, row) == false)
+                    {
+                        isLineComplete = false;
+                        break;
+                    }
+                }
+
+                if (isLineComplete)
+                {
+                    RemoveLine(row);
+                }
+            }
+        }
+
+        public void RemoveLine(int row)
+        {
+            for (int i = row; i > 0; i--)
+            {
+                for (int j = 0; j < GameLoop.GRID_WIDTH; j++)
+                {
+                    foreach (var block in GameLoop.blocks)
+                    {
+                        if (block.y == i - 1 && block.x == j)
+                        {
+                            block.y++;
+                        }
+                    }
+                }
+            }
+
+            foreach (var block in GameLoop.blocks)
+            {
+                if (block.y == 0 && block.x == row)
+                {
+                    GameLoop.blocks.Remove(block);
+                }
+            }
         }
     }
 
