@@ -6,7 +6,8 @@ namespace Tetris
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            GameLoop game = new GameLoop();
+            game.Run();
         }
     }
 }
