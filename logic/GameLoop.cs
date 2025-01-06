@@ -6,6 +6,13 @@ using Raylib_CsLo;
 
 namespace Tetris
 {
+    enum GameState
+    {
+        Menu,
+        Playing,
+        GameOver
+    }
+
     class GameLoop
     {
         public const int SCREEN_WIDTH = 800;
@@ -18,12 +25,18 @@ namespace Tetris
 
         public static float deltaTime = 0.0f;
 
+        public static int score = 0;
+        public static int level = 0;
+        public static int linesCleared = 0;
+
         public static List<Block> blocks;
         public static int[,] grid = new int[GRID_HEIGHT, GRID_WIDTH];
         public static Color[,] colorGrid = new Color[GRID_HEIGHT, GRID_WIDTH];
 
         public static Block currentBlock;
         public static Block nextBlock;
+
+        public static GameState currentState = GameState.Menu;
 
         public GameLoop()
         {
@@ -56,16 +69,30 @@ namespace Tetris
 
                 deltaTime = Raylib.GetFrameTime();
 
-                Input();
-                Update();
-                Draw();
+                switch (currentState)
+                {
+                    case GameState.Menu:
+                        DrawMenu();
+                        HandleMenuInput();
+                        break;
+
+                    case GameState.Playing:
+                        Input();
+                        Update();
+                        Draw();
+                        break;
+
+                    case GameState.GameOver:
+                        DrawGameOver();
+                        HandleGameOverInput();
+                        break;
+                }
 
                 Raylib.EndDrawing();
             }
             Raylib.CloseWindow();
         }
 
-        // INPUT ET MOUVEMENT
         public void Input()
         {
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_UP))
@@ -87,13 +114,19 @@ namespace Tetris
         {
             currentBlock.FallTetromino();
             CheckLines();
+            CheckGameOver();
         }
 
         public void Draw()
         {
             DrawGrid();
             DrawPlacedBlocks();
+
             currentBlock.DrawTetromino();
+            nextBlock.DrawNextBlock(SCREEN_WIDTH - 200 + 50, 50);
+
+            Raylib.DrawText($"Score: {score}", SCREEN_WIDTH - 180, 20, 20, Raylib.DARKBLUE);
+            Raylib.DrawText($"Level: {level}", SCREEN_WIDTH - 180, 50, 20, Raylib.DARKBLUE);
         }
 
         public void DrawGrid()
@@ -170,6 +203,49 @@ namespace Tetris
             }
         }
 
+        public void CheckGameOver()
+        {
+            for (int j = 0; j < GRID_WIDTH; j++)
+            {
+                if (grid[0, j] != 0)
+                {
+                    currentState = GameState.GameOver;
+                }
+            }
+        }
+
+        public void DrawGameOver()
+        {
+            Raylib.DrawText("GAME OVER", SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 - 50, 40, Raylib.DARKBLUE);
+            Raylib.DrawText("Press ENTER to restart", SCREEN_WIDTH / 2 - 150, SCREEN_HEIGHT / 2, 20, Raylib.DARKBLUE);
+        }
+
+        public void HandleGameOverInput()
+        {
+            if (Raylib.IsKeyPressed(KeyboardKey.KEY_ENTER))
+            {
+                score = 0;
+                level = 0;
+                linesCleared = 0;
+                InitializeGrid();
+                currentState = GameState.Playing;
+            }
+        }
+
+        public void DrawMenu()
+        {
+            Raylib.DrawText("TETRIS", SCREEN_WIDTH / 2 - 60, SCREEN_HEIGHT / 2 - 100, 40, Raylib.DARKGREEN);
+            Raylib.DrawText("Press ENTER to start", SCREEN_WIDTH / 2 - 150, SCREEN_HEIGHT / 2, 20, Raylib.DARKBLUE);
+        }
+
+        public void HandleMenuInput()
+        {
+            if (Raylib.IsKeyPressed(KeyboardKey.KEY_ENTER))
+            {
+                currentState = GameState.Playing;
+            }
+        }
+
         public static Block GenerateRandomBlock()
         {
             Random random = new Random();
@@ -178,7 +254,30 @@ namespace Tetris
 
             return new Block(GRID_WIDTH / 2 - randomBlock.shape.GetLength(1) / 2, 0, randomBlock.shape, randomBlock.color);
         }
+
+        public static void IncreaseScore(int lineCount)
+        {
+            switch (lineCount)
+            {
+                case 1:
+                    score += 40 * (level + 1);
+                    break;
+                case 2:
+                    score += 100 * (level + 1);
+                    break;
+                case 3:
+                    score += 300 * (level + 1);
+                    break;
+                case 4:
+                    score += 1200 * (level + 1);
+                    break;
+            }
+
+            linesCleared += lineCount;
+            level = linesCleared / 10;
+        }
     }
+
 
     class Block
     {
@@ -242,6 +341,21 @@ namespace Tetris
                     {
                         Raylib.DrawRectangle(GameLoop.MARGIN_X + (x + j) * GameLoop.CELL_SIZE, GameLoop.MARGIN_Y + (y + i) * GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, color);
                         Raylib.DrawRectangleLines(GameLoop.MARGIN_X + (x + j) * GameLoop.CELL_SIZE, GameLoop.MARGIN_Y + (y + i) * GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, Raylib.DARKGRAY);
+                    }
+                }
+            }
+        }
+
+        public void DrawNextBlock(int x, int y)
+        {
+            for (int i = 0; i < shape.GetLength(0); i++)
+            {
+                for (int j = 0; j < shape.GetLength(1); j++)
+                {
+                    if (shape[i, j] == 1)
+                    {
+                        Raylib.DrawRectangle(x + j * GameLoop.CELL_SIZE, y + i * GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, color);
+                        Raylib.DrawRectangleLines(x + j * GameLoop.CELL_SIZE, y + i * GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, Raylib.DARKGRAY);
                     }
                 }
             }
