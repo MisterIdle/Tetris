@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Collections.Generic;
 using Raylib_CsLo;
 
@@ -20,6 +19,9 @@ namespace Tetris
         public static float deltaTime = 0.0f;
 
         public static List<Block> blocks;
+        public static int[,] grid = new int[GRID_HEIGHT, GRID_WIDTH];
+        public static Color[,] colorGrid = new Color[GRID_HEIGHT, GRID_WIDTH];
+
         public static Block currentBlock;
         public static Block nextBlock;
 
@@ -28,6 +30,19 @@ namespace Tetris
             blocks = new List<Block>();
             currentBlock = GenerateRandomBlock();
             nextBlock = GenerateRandomBlock();
+            InitializeGrid();
+        }
+
+        public static void InitializeGrid()
+        {
+            for (int i = 0; i < GRID_HEIGHT; i++)
+            {
+                for (int j = 0; j < GRID_WIDTH; j++)
+                {
+                    grid[i, j] = 0;
+                    colorGrid[i, j] = Raylib.LIGHTGRAY;
+                }
+            }
         }
 
         public void Run()
@@ -50,7 +65,7 @@ namespace Tetris
             Raylib.CloseWindow();
         }
 
-        // INPUT AND DRAWING //
+        // INPUT ET MOUVEMENT
         public void Input()
         {
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_UP))
@@ -71,17 +86,13 @@ namespace Tetris
         public void Update()
         {
             currentBlock.FallTetromino();
+            CheckLines();
         }
 
         public void Draw()
         {
             DrawGrid();
-
-            foreach (var block in blocks)
-            {
-                block.DrawTetromino();
-            }
-
+            DrawPlacedBlocks();
             currentBlock.DrawTetromino();
         }
 
@@ -95,9 +106,70 @@ namespace Tetris
                     Raylib.DrawRectangleLines(MARGIN_X + j * CELL_SIZE, MARGIN_Y + i * CELL_SIZE, CELL_SIZE, CELL_SIZE, Raylib.DARKGRAY);
                 }
             }
+
+            Raylib.DrawRectangle(SCREEN_WIDTH - 200, 0, 200, SCREEN_HEIGHT, Raylib.DARKGRAY);
+            Raylib.DrawRectangleLines(SCREEN_WIDTH - 200, 0, 200, SCREEN_HEIGHT, Raylib.BLACK);
         }
 
-        // BLOCK GENERATION //
+        public void DrawPlacedBlocks()
+        {
+            for (int i = 0; i < GRID_HEIGHT; i++)
+            {
+                for (int j = 0; j < GRID_WIDTH; j++)
+                {
+                    if (grid[i, j] != 0) 
+                    {
+                        Raylib.DrawRectangle(MARGIN_X + j * CELL_SIZE, MARGIN_Y + i * CELL_SIZE, CELL_SIZE, CELL_SIZE, colorGrid[i, j]);
+                        Raylib.DrawRectangleLines(MARGIN_X + j * CELL_SIZE, MARGIN_Y + i * CELL_SIZE, CELL_SIZE, CELL_SIZE, Raylib.DARKGRAY);
+                    }
+                }
+            }
+        }
+
+        public void CheckLines()
+        {
+            for (int i = GRID_HEIGHT - 1; i >= 0; i--)
+            {
+                bool isLineFull = true;
+                for (int j = 0; j < GRID_WIDTH; j++)
+                {
+                    if (grid[i, j] == 0)
+                    {
+                        isLineFull = false;
+                        break;
+                    }
+                }
+
+                if (isLineFull)
+                {
+                    RemoveLine(i);
+                    ShiftLinesDown(i);
+                    i++;
+                }
+            }
+        }
+
+        public void RemoveLine(int lineIndex)
+        {
+            for (int j = 0; j < GRID_WIDTH; j++)
+            {
+                grid[lineIndex, j] = 0;
+                colorGrid[lineIndex, j] = Raylib.LIGHTGRAY;
+            }
+        }
+
+        public void ShiftLinesDown(int startLine)
+        {
+            for (int i = startLine; i > 0; i--)
+            {
+                for (int j = 0; j < GRID_WIDTH; j++)
+                {
+                    grid[i, j] = grid[i - 1, j];
+                    colorGrid[i, j] = colorGrid[i - 1, j];
+                }
+            }
+        }
+
         public static Block GenerateRandomBlock()
         {
             Random random = new Random();
@@ -126,7 +198,6 @@ namespace Tetris
             this.color = color;
         }
 
-        // JSON LOADING //
         public static List<Block> LoadFromJson(string filePath)
         {
             string jsonContent = File.ReadAllText(filePath);
@@ -144,7 +215,6 @@ namespace Tetris
             return blocks;
         }
 
-        // .NET 5.0 requires a conversion because [,] is not supported. (Developer note 😉)
         private static int[,] ConvertTo2DArray(int[][] jaggedArray)
         {
             int rows = jaggedArray.Length;
@@ -162,7 +232,6 @@ namespace Tetris
             return array;
         }
 
-        // DRAWING AND MOVEMENT //
         public void DrawTetromino()
         {
             for (int i = 0; i < shape.GetLength(0); i++)
@@ -199,14 +268,15 @@ namespace Tetris
 
             if (fallTimer >= fallInterval)
             {
-                y++;
+                int newY = y + 1;
 
-                if (CheckCollision())
+                if (newY < GameLoop.GRID_HEIGHT && !CheckCollision(newY))
                 {
-                    y--;
-                    LockTetromino();
-                    GameLoop.blocks.Add(this);
-                    GameLoop.currentBlock = GameLoop.GenerateRandomBlock();
+                    y++;
+                }
+                else
+                {
+                    PlaceBlock();
                 }
 
                 fallTimer = 0.0f;
@@ -239,8 +309,7 @@ namespace Tetris
             }
         }
 
-        // COLLISION DETECTION //
-        public bool CheckCollision()
+        public void PlaceBlock()
         {
             for (int i = 0; i < shape.GetLength(0); i++)
             {
@@ -251,12 +320,33 @@ namespace Tetris
                         int newX = x + j;
                         int newY = y + i;
 
-                        if (newX < 0 || newX >= GameLoop.GRID_WIDTH || newY >= GameLoop.GRID_HEIGHT)
+                        if (newX >= 0 && newX < GameLoop.GRID_WIDTH && newY >= 0 && newY < GameLoop.GRID_HEIGHT)
                         {
-                            return true;
+                            GameLoop.grid[newY, newX] = 1;
+                            GameLoop.colorGrid[newY, newX] = color;
                         }
+                    }
+                }
+            }
 
-                        if (IsCellOccupied(newX, newY))
+            GameLoop.currentBlock = GameLoop.nextBlock;
+            GameLoop.nextBlock = GameLoop.GenerateRandomBlock();
+        }
+
+        public bool CheckCollision(int? newY = null)
+        {
+            int checkY = newY ?? y;
+
+            for (int i = 0; i < shape.GetLength(0); i++)
+            {
+                for (int j = 0; j < shape.GetLength(1); j++)
+                {
+                    if (shape[i, j] == 1)
+                    {
+                        int checkX = x + j;
+                        int checkYLocal = checkY + i;
+
+                        if (checkYLocal >= GameLoop.GRID_HEIGHT || checkX < 0 || checkX >= GameLoop.GRID_WIDTH || GameLoop.grid[checkYLocal, checkX] != 0)
                         {
                             return true;
                         }
@@ -265,86 +355,10 @@ namespace Tetris
             }
 
             return false;
-        }
-
-        private bool IsCellOccupied(int x, int y)
-        {
-            foreach (var block in GameLoop.blocks)
-            {
-                for (int i = 0; i < block.shape.GetLength(0); i++)
-                {
-                    for (int j = 0; j < block.shape.GetLength(1); j++)
-                    {
-                        if (block.shape[i, j] == 1)
-                        {
-                            int blockX = block.x + j;
-                            int blockY = block.y + i;
-                            if (blockX == x && blockY == y)
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
-        public void LockTetromino()
-        {
-            GameLoop.blocks.Add(this);
-            ClearCompleteLines();
-        }
-
-        public void ClearCompleteLines()
-        {
-            for (int row = 0; row < GameLoop.GRID_HEIGHT; row++)
-            {
-                bool isLineComplete = true;
-
-                for (int col = 0; col < GameLoop.GRID_WIDTH; col++)
-                {
-                    if (IsCellOccupied(col, row) == false)
-                    {
-                        isLineComplete = false;
-                        break;
-                    }
-                }
-
-                if (isLineComplete)
-                {
-                    RemoveLine(row);
-                }
-            }
-        }
-
-        public void RemoveLine(int row)
-        {
-            for (int i = row; i > 0; i--)
-            {
-                for (int j = 0; j < GameLoop.GRID_WIDTH; j++)
-                {
-                    foreach (var block in GameLoop.blocks)
-                    {
-                        if (block.y == i - 1 && block.x == j)
-                        {
-                            block.y++;
-                        }
-                    }
-                }
-            }
-
-            foreach (var block in GameLoop.blocks)
-            {
-                if (block.y == 0 && block.x == row)
-                {
-                    GameLoop.blocks.Remove(block);
-                }
-            }
         }
     }
 
-    class TetrominoData
+    public class TetrominoData
     {
         public string Name { get; set; }
         public int[] Color { get; set; }
