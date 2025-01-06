@@ -1,18 +1,9 @@
 using System;
-using System.IO;
-using System.Text.Json;
 using System.Collections.Generic;
 using Raylib_CsLo;
 
 namespace Tetris
 {
-    enum GameState
-    {
-        Menu,
-        Playing,
-        GameOver
-    }
-
     class GameLoop
     {
         public const int SCREEN_WIDTH = 800;
@@ -22,20 +13,30 @@ namespace Tetris
         public const int CELL_SIZE = 30;
         public const int MARGIN_X = 50;
         public const int MARGIN_Y = 0;
-
         public static float deltaTime = 0.0f;
-
         public static int score = 0;
         public static int level = 0;
         public static int linesCleared = 0;
-
+        public static int blinkCount = 6;
+        public static float blinkDuration = 0.1f;
+        public static float normalFallSpeed = 1.0f;
+        public static float fastFallSpeed = 0.07f;
+        public static Color gridColor = Raylib.LIGHTGRAY;
+        public static Color gridLineColor = Raylib.DARKGRAY;
+        public static Color sidePanelColor = Raylib.DARKGRAY;
+        public static Color textColor = Raylib.DARKBLUE;
+        public static Color menuTitleColor = Raylib.DARKGREEN;
+        public static int textSize = 20;
+        public static int titleSize = 40;
+        public static int menuTitleOffsetX = -60;
+        public static int menuTitleOffsetY = -100;
+        public static int menuTextOffsetX = -150;
+        public static int menuTextOffsetY = 0;
         public static List<Block> blocks;
         public static int[,] grid = new int[GRID_HEIGHT, GRID_WIDTH];
         public static Color[,] colorGrid = new Color[GRID_HEIGHT, GRID_WIDTH];
-
         public static Block currentBlock;
         public static Block nextBlock;
-
         public static GameState currentState = GameState.Menu;
 
         public GameLoop()
@@ -53,7 +54,7 @@ namespace Tetris
                 for (int j = 0; j < GRID_WIDTH; j++)
                 {
                     grid[i, j] = 0;
-                    colorGrid[i, j] = Raylib.LIGHTGRAY;
+                    colorGrid[i, j] = gridColor;
                 }
             }
         }
@@ -61,33 +62,27 @@ namespace Tetris
         public void Run()
         {
             Raylib.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Tetris Game");
-
             while (!Raylib.WindowShouldClose())
             {
                 Raylib.BeginDrawing();
                 Raylib.ClearBackground(Raylib.RAYWHITE);
-
                 deltaTime = Raylib.GetFrameTime();
-
                 switch (currentState)
                 {
                     case GameState.Menu:
                         DrawMenu();
                         HandleMenuInput();
                         break;
-
                     case GameState.Playing:
                         Input();
                         Update();
                         Draw();
                         break;
-
                     case GameState.GameOver:
                         DrawGameOver();
                         HandleGameOverInput();
                         break;
                 }
-
                 Raylib.EndDrawing();
             }
             Raylib.CloseWindow();
@@ -97,17 +92,16 @@ namespace Tetris
         {
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_UP))
                 currentBlock.RotateTetromino();
-
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_LEFT))
                 currentBlock.MoveTetromino(-1, 0);
-
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_RIGHT))
                 currentBlock.MoveTetromino(1, 0);
-
             if (Raylib.IsKeyDown(KeyboardKey.KEY_DOWN))
-                currentBlock.SetFallSpeed(0.07f);
+                currentBlock.SetFallSpeed(fastFallSpeed);
             else
-                currentBlock.SetFallSpeed(1.0f);
+                currentBlock.SetFallSpeed(normalFallSpeed);
+            if (Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE))
+                currentBlock.PlaceBlockAtBottom();
         }
 
         public void Update()
@@ -121,12 +115,11 @@ namespace Tetris
         {
             DrawGrid();
             DrawPlacedBlocks();
-
+            DrawShadow();
             currentBlock.DrawTetromino();
             nextBlock.DrawNextBlock(SCREEN_WIDTH - 200 + 50, 50);
-
-            Raylib.DrawText($"Score: {score}", SCREEN_WIDTH - 180, 20, 20, Raylib.DARKBLUE);
-            Raylib.DrawText($"Level: {level}", SCREEN_WIDTH - 180, 50, 20, Raylib.DARKBLUE);
+            Raylib.DrawText($"Score: {score}", SCREEN_WIDTH - 180, 20, textSize, textColor);
+            Raylib.DrawText($"Level: {level}", SCREEN_WIDTH - 180, 50, textSize, textColor);
         }
 
         public void DrawGrid()
@@ -135,13 +128,22 @@ namespace Tetris
             {
                 for (int j = 0; j < GRID_WIDTH; j++)
                 {
-                    Raylib.DrawRectangle(MARGIN_X + j * CELL_SIZE, MARGIN_Y + i * CELL_SIZE, CELL_SIZE, CELL_SIZE, Raylib.LIGHTGRAY);
-                    Raylib.DrawRectangleLines(MARGIN_X + j * CELL_SIZE, MARGIN_Y + i * CELL_SIZE, CELL_SIZE, CELL_SIZE, Raylib.DARKGRAY);
+                    Raylib.DrawRectangle(MARGIN_X + j * CELL_SIZE, MARGIN_Y + i * CELL_SIZE, CELL_SIZE, CELL_SIZE, gridColor);
+                    Raylib.DrawRectangleLines(MARGIN_X + j * CELL_SIZE, MARGIN_Y + i * CELL_SIZE, CELL_SIZE, CELL_SIZE, gridLineColor);
                 }
             }
-
-            Raylib.DrawRectangle(SCREEN_WIDTH - 200, 0, 200, SCREEN_HEIGHT, Raylib.DARKGRAY);
+            Raylib.DrawRectangle(SCREEN_WIDTH - 200, 0, 200, SCREEN_HEIGHT, sidePanelColor);
             Raylib.DrawRectangleLines(SCREEN_WIDTH - 200, 0, 200, SCREEN_HEIGHT, Raylib.BLACK);
+        }
+
+        public void DrawShadow()
+        {
+            Block shadowBlock = new Block(currentBlock.x, currentBlock.y, currentBlock.shape, new Color(0, 0, 0, 100));
+            while (!shadowBlock.CheckCollision(shadowBlock.y + 1))
+            {
+                shadowBlock.y++;
+            }
+            shadowBlock.DrawTetromino();
         }
 
         public void DrawPlacedBlocks()
@@ -153,9 +155,24 @@ namespace Tetris
                     if (grid[i, j] != 0) 
                     {
                         Raylib.DrawRectangle(MARGIN_X + j * CELL_SIZE, MARGIN_Y + i * CELL_SIZE, CELL_SIZE, CELL_SIZE, colorGrid[i, j]);
-                        Raylib.DrawRectangleLines(MARGIN_X + j * CELL_SIZE, MARGIN_Y + i * CELL_SIZE, CELL_SIZE, CELL_SIZE, Raylib.DARKGRAY);
+                        Raylib.DrawRectangleLines(MARGIN_X + j * CELL_SIZE, MARGIN_Y + i * CELL_SIZE, CELL_SIZE, CELL_SIZE, gridLineColor);
                     }
                 }
+            }
+        }
+
+        public void BlinkLine(int lineIndex, int blinkCount, float blinkDuration)
+        {
+            for (int blink = 0; blink < blinkCount; blink++)
+            {
+                for (int j = 0; j < GRID_WIDTH; j++)
+                {
+                    colorGrid[lineIndex, j] = (blink % 2 == 0) ? Raylib.RED : gridColor;
+                }
+                Draw();
+                Raylib.EndDrawing();
+                Raylib.BeginDrawing();
+                Raylib.WaitTime(blinkDuration);
             }
         }
 
@@ -172,12 +189,12 @@ namespace Tetris
                         break;
                     }
                 }
-
                 if (isLineFull)
                 {
+                    BlinkLine(i, blinkCount, blinkDuration);
                     RemoveLine(i);
                     ShiftLinesDown(i);
-                    i++;
+                    IncreaseScore(1);
                 }
             }
         }
@@ -187,7 +204,7 @@ namespace Tetris
             for (int j = 0; j < GRID_WIDTH; j++)
             {
                 grid[lineIndex, j] = 0;
-                colorGrid[lineIndex, j] = Raylib.LIGHTGRAY;
+                colorGrid[lineIndex, j] = gridColor;
             }
         }
 
@@ -216,8 +233,8 @@ namespace Tetris
 
         public void DrawGameOver()
         {
-            Raylib.DrawText("GAME OVER", SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 - 50, 40, Raylib.DARKBLUE);
-            Raylib.DrawText("Press ENTER to restart", SCREEN_WIDTH / 2 - 150, SCREEN_HEIGHT / 2, 20, Raylib.DARKBLUE);
+            Raylib.DrawText("GAME OVER", SCREEN_WIDTH / 2 + menuTitleOffsetX, SCREEN_HEIGHT / 2 + menuTitleOffsetY, titleSize, textColor);
+            Raylib.DrawText("Press ENTER to restart", SCREEN_WIDTH / 2 + menuTextOffsetX, SCREEN_HEIGHT / 2 + menuTextOffsetY, textSize, textColor);
         }
 
         public void HandleGameOverInput()
@@ -234,8 +251,8 @@ namespace Tetris
 
         public void DrawMenu()
         {
-            Raylib.DrawText("TETRIS", SCREEN_WIDTH / 2 - 60, SCREEN_HEIGHT / 2 - 100, 40, Raylib.DARKGREEN);
-            Raylib.DrawText("Press ENTER to start", SCREEN_WIDTH / 2 - 150, SCREEN_HEIGHT / 2, 20, Raylib.DARKBLUE);
+            Raylib.DrawText("TETRIS", SCREEN_WIDTH / 2 + menuTitleOffsetX, SCREEN_HEIGHT / 2 + menuTitleOffsetY, titleSize, menuTitleColor);
+            Raylib.DrawText("Press ENTER to start", SCREEN_WIDTH / 2 + menuTextOffsetX, SCREEN_HEIGHT / 2 + menuTextOffsetY, textSize, textColor);
         }
 
         public void HandleMenuInput()
@@ -249,9 +266,8 @@ namespace Tetris
         public static Block GenerateRandomBlock()
         {
             Random random = new Random();
-            int index = random.Next(Block.LoadFromJson("json/blocks.json").Count);
-            Block randomBlock = Block.LoadFromJson("json/blocks.json")[index];
-
+            int index = random.Next(JsonLoader.LoadFromJson("json/blocks.json").Count);
+            Block randomBlock = JsonLoader.LoadFromJson("json/blocks.json")[index];
             return new Block(GRID_WIDTH / 2 - randomBlock.shape.GetLength(1) / 2, 0, randomBlock.shape, randomBlock.color);
         }
 
@@ -259,223 +275,13 @@ namespace Tetris
         {
             switch (lineCount)
             {
-                case 1:
-                    score += 40 * (level + 1);
-                    break;
-                case 2:
-                    score += 100 * (level + 1);
-                    break;
-                case 3:
-                    score += 300 * (level + 1);
-                    break;
-                case 4:
-                    score += 1200 * (level + 1);
-                    break;
+                case 1: score += 40 * (level + 1); break;
+                case 2: score += 100 * (level + 1); break;
+                case 3: score += 300 * (level + 1); break;
+                case 4: score += 1200 * (level + 1); break;
             }
-
             linesCleared += lineCount;
             level = linesCleared / 10;
         }
-    }
-
-
-    class Block
-    {
-        public int x;
-        public int y;
-        public int[,] shape;
-        public Color color;
-
-        public float fallTimer = 0.0f;
-        public float fallInterval = 1.0f;
-
-        public Block(int x, int y, int[,] shape, Color color)
-        {
-            this.x = x;
-            this.y = y;
-            this.shape = shape;
-            this.color = color;
-        }
-
-        public static List<Block> LoadFromJson(string filePath)
-        {
-            string jsonContent = File.ReadAllText(filePath);
-            var blocksData = JsonSerializer.Deserialize<List<TetrominoData>>(jsonContent);
-
-            var blocks = new List<Block>();
-            foreach (var data in blocksData)
-            {
-                Color blockColor = new Color(data.Color[0], data.Color[1], data.Color[2], 255);
-
-                int[,] shape = ConvertTo2DArray(data.Shape);
-                blocks.Add(new Block(0, 0, shape, blockColor));
-            }
-
-            return blocks;
-        }
-
-        private static int[,] ConvertTo2DArray(int[][] jaggedArray)
-        {
-            int rows = jaggedArray.Length;
-            int cols = jaggedArray[0].Length;
-            int[,] array = new int[rows, cols];
-
-            for (int i = 0; i < rows; i++)
-            {
-                for (int j = 0; j < cols; j++)
-                {
-                    array[i, j] = jaggedArray[i][j];
-                }
-            }
-
-            return array;
-        }
-
-        public void DrawTetromino()
-        {
-            for (int i = 0; i < shape.GetLength(0); i++)
-            {
-                for (int j = 0; j < shape.GetLength(1); j++)
-                {
-                    if (shape[i, j] == 1)
-                    {
-                        Raylib.DrawRectangle(GameLoop.MARGIN_X + (x + j) * GameLoop.CELL_SIZE, GameLoop.MARGIN_Y + (y + i) * GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, color);
-                        Raylib.DrawRectangleLines(GameLoop.MARGIN_X + (x + j) * GameLoop.CELL_SIZE, GameLoop.MARGIN_Y + (y + i) * GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, Raylib.DARKGRAY);
-                    }
-                }
-            }
-        }
-
-        public void DrawNextBlock(int x, int y)
-        {
-            for (int i = 0; i < shape.GetLength(0); i++)
-            {
-                for (int j = 0; j < shape.GetLength(1); j++)
-                {
-                    if (shape[i, j] == 1)
-                    {
-                        Raylib.DrawRectangle(x + j * GameLoop.CELL_SIZE, y + i * GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, color);
-                        Raylib.DrawRectangleLines(x + j * GameLoop.CELL_SIZE, y + i * GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, GameLoop.CELL_SIZE, Raylib.DARKGRAY);
-                    }
-                }
-            }
-        }
-
-        public void MoveTetromino(int dx, int dy)
-        {
-            int prevX = x;
-            int prevY = y;
-
-            x += dx;
-            y += dy;
-
-            if (CheckCollision())
-            {
-                x = prevX;
-                y = prevY;
-            }
-        }
-
-        public void FallTetromino()
-        {
-            fallTimer += GameLoop.deltaTime;
-
-            if (fallTimer >= fallInterval)
-            {
-                int newY = y + 1;
-
-                if (newY < GameLoop.GRID_HEIGHT && !CheckCollision(newY))
-                {
-                    y++;
-                }
-                else
-                {
-                    PlaceBlock();
-                }
-
-                fallTimer = 0.0f;
-            }
-        }
-
-        public void SetFallSpeed(float speed)
-        {
-            fallInterval = speed;
-        }
-
-        public void RotateTetromino()
-        {
-            int[,] rotatedShape = new int[shape.GetLength(1), shape.GetLength(0)];
-
-            for (int i = 0; i < shape.GetLength(0); i++)
-            {
-                for (int j = 0; j < shape.GetLength(1); j++)
-                {
-                    rotatedShape[j, shape.GetLength(0) - 1 - i] = shape[i, j];
-                }
-            }
-
-            int[,] prevShape = shape;
-            shape = rotatedShape;
-
-            if (CheckCollision())
-            {
-                shape = prevShape;
-            }
-        }
-
-        public void PlaceBlock()
-        {
-            for (int i = 0; i < shape.GetLength(0); i++)
-            {
-                for (int j = 0; j < shape.GetLength(1); j++)
-                {
-                    if (shape[i, j] == 1)
-                    {
-                        int newX = x + j;
-                        int newY = y + i;
-
-                        if (newX >= 0 && newX < GameLoop.GRID_WIDTH && newY >= 0 && newY < GameLoop.GRID_HEIGHT)
-                        {
-                            GameLoop.grid[newY, newX] = 1;
-                            GameLoop.colorGrid[newY, newX] = color;
-                        }
-                    }
-                }
-            }
-
-            GameLoop.currentBlock = GameLoop.nextBlock;
-            GameLoop.nextBlock = GameLoop.GenerateRandomBlock();
-        }
-
-        public bool CheckCollision(int? newY = null)
-        {
-            int checkY = newY ?? y;
-
-            for (int i = 0; i < shape.GetLength(0); i++)
-            {
-                for (int j = 0; j < shape.GetLength(1); j++)
-                {
-                    if (shape[i, j] == 1)
-                    {
-                        int checkX = x + j;
-                        int checkYLocal = checkY + i;
-
-                        if (checkYLocal >= GameLoop.GRID_HEIGHT || checkX < 0 || checkX >= GameLoop.GRID_WIDTH || GameLoop.grid[checkYLocal, checkX] != 0)
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            return false;
-        }
-    }
-
-    public class TetrominoData
-    {
-        public string Name { get; set; }
-        public int[] Color { get; set; }
-        public int[][] Shape { get; set; }
     }
 }
