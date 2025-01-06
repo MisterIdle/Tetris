@@ -13,30 +13,41 @@ namespace Tetris
         public const int CELL_SIZE = 30;
         public const int MARGIN_X = 50;
         public const int MARGIN_Y = 0;
+
         public static float deltaTime = 0.0f;
+
         public static int score = 0;
         public static int level = 0;
         public static int linesCleared = 0;
+
         public static int blinkCount = 6;
         public static float blinkDuration = 0.1f;
+
         public static float normalFallSpeed = 1.0f;
         public static float fastFallSpeed = 0.07f;
+
         public static Color gridColor = Raylib.LIGHTGRAY;
         public static Color gridLineColor = Raylib.DARKGRAY;
         public static Color sidePanelColor = Raylib.DARKGRAY;
         public static Color textColor = Raylib.DARKBLUE;
         public static Color menuTitleColor = Raylib.DARKGREEN;
+
         public static int textSize = 20;
         public static int titleSize = 40;
         public static int menuTitleOffsetX = -60;
         public static int menuTitleOffsetY = -100;
         public static int menuTextOffsetX = -150;
         public static int menuTextOffsetY = 0;
+
+        public static bool isRobotPlaying = false;
+
         public static List<Block> blocks;
         public static int[,] grid = new int[GRID_HEIGHT, GRID_WIDTH];
         public static Color[,] colorGrid = new Color[GRID_HEIGHT, GRID_WIDTH];
+
         public static Block currentBlock;
         public static Block nextBlock;
+
         public static GameState currentState = GameState.Menu;
 
         public GameLoop()
@@ -61,7 +72,7 @@ namespace Tetris
 
         public void Run()
         {
-            Raylib.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Tetris Game");
+            Raylib.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Tetris Game | By MisterIdle");
             while (!Raylib.WindowShouldClose())
             {
                 Raylib.BeginDrawing();
@@ -92,16 +103,23 @@ namespace Tetris
         {
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_UP))
                 currentBlock.RotateTetromino();
+
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_LEFT))
                 currentBlock.MoveTetromino(-1, 0);
+
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_RIGHT))
                 currentBlock.MoveTetromino(1, 0);
+
             if (Raylib.IsKeyDown(KeyboardKey.KEY_DOWN))
                 currentBlock.SetFallSpeed(fastFallSpeed);
             else
                 currentBlock.SetFallSpeed(normalFallSpeed);
+
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE))
                 currentBlock.PlaceBlockAtBottom();
+
+            if (Raylib.IsKeyPressed(KeyboardKey.KEY_R))
+                isRobotPlaying = !isRobotPlaying;
         }
 
         public void Update()
@@ -116,11 +134,15 @@ namespace Tetris
             DrawGrid();
             DrawPlacedBlocks();
             DrawShadow();
+
+
             currentBlock.DrawTetromino();
             nextBlock.DrawNextBlock(SCREEN_WIDTH - 200 + 50, 50);
+
             Raylib.DrawText($"Score: {score}", SCREEN_WIDTH - 180, 20, textSize, textColor);
             Raylib.DrawText($"Level: {level}", SCREEN_WIDTH - 180, 50, textSize, textColor);
         }
+
 
         public void DrawGrid()
         {
@@ -218,6 +240,28 @@ namespace Tetris
                     colorGrid[i, j] = colorGrid[i - 1, j];
                 }
             }
+        }
+        public bool IsOccupied(int x, int y)
+        {
+            if (x < 0 || x >= GRID_WIDTH || y < 0 || y >= GRID_HEIGHT)
+            {
+                return false;
+            }
+
+            return grid[y, x] != 0;
+        }
+
+
+        public bool IsLineCleared(int y)
+        {
+            for (int x = 0; x < GRID_WIDTH; x++)
+            {
+                if (grid[y, x] == 0)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public void CheckGameOver()

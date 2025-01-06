@@ -1,6 +1,3 @@
-using System.IO;
-using System.Text.Json;
-using System.Collections.Generic;
 using Raylib_CsLo;
 
 namespace Tetris {
@@ -8,6 +5,7 @@ namespace Tetris {
     {
         public int x;
         public int y;
+
         public int[,] shape;
         public Color color;
 
