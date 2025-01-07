@@ -170,8 +170,6 @@ namespace Tetris
 
         public void CheckLines()
         {
-            List<int> linesToClear = new List<int>();
-
             for (int i = GRID_HEIGHT - 1; i >= 0; i--)
             {
                 bool isLineFull = true;
@@ -186,20 +184,16 @@ namespace Tetris
 
                 if (isLineFull)
                 {
-                    linesToClear.Add(i);
-                }
-            }
+                    score += 100;
+                    if (score % 1000 == 0)
+                    {
+                        level++;
+                    }
 
-            if (linesToClear.Count > 0)
-            {
-                foreach (int lineIndex in linesToClear)
-                {
-                    BlinkLine(lineIndex, blinkCount, blinkDuration);
+                    BlinkLine(i, blinkCount, blinkDuration);
+                    ShiftLinesDown(new List<int> { i });
+                    i++;
                 }
-
-                score += linesToClear.Count * 100;
-                level = score / 1000 + 1;
-                ShiftLinesDown(linesToClear);
             }
         }
 
