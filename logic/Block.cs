@@ -43,7 +43,15 @@ namespace Tetris {
                 {
                     if (shape[i, j] == 1)
                     {
-                        DrawBlock(x + j, y + i, color);
+                        // Check 2x2 blocks
+                        if (shape.GetLength(0) == 2 && shape.GetLength(1) == 2)
+                        {
+                            DrawBlock(x + j, y + i + 1, color);
+                        }
+                        else
+                        {
+                            DrawBlock(x + j, y + i, color);
+                        }
                     }
                 }
             }

@@ -30,11 +30,12 @@ namespace Tetris {
         {
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_ENTER))
             {
-                Score.score = 0;
-                Score.level = 0;
-                Score.linesCleared = 0;
+                GameLoop.score = 0;
+                GameLoop.level = 1;
+                GameLoop.lines = 0;
+                GameLoop.gameOverAnimationTime = 0.0f;
                 GameLoop.InitializeGrid();
-                GameLoop.currentState = GameState.Playing;
+                GameLoop.currentState = GameState.Menu;
             }
         }
 
