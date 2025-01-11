@@ -8,8 +8,11 @@ namespace Tetris
         public const int SCREEN_HEIGHT = 600;
         public Color backgroundColor = new Color(17, 24, 38, 255);
         public Font font;
-        private Sound backgroundMusic;
         public GameState currentState;
+
+        public float masterVolume = 0.5f;
+        public float musicVolume = 0.5f;
+        public float sfxVolume = 0.5f;
 
         private void Init()
         {
@@ -18,18 +21,21 @@ namespace Tetris
 
             Raylib.InitAudioDevice();
 
-            backgroundMusic = Raylib.LoadSound("audio/Theme.mp3");
-
             font = Raylib.LoadFont("font/Font.ttf");
 
-            currentState = GameState.Loading;
-            SceneManager.SetScene(new GameScene(this));
+            SoundManager.LoadSound();
+
+            currentState = GameState.Menu;
+            SceneManager.SetScene(new GameMenu(this));
         }
 
         private void SwitchSceneGameStates()
         {
             switch (currentState)
             {
+                case GameState.Menu:
+                    SceneManager.SetScene(new GameMenu(this));
+                    break;
                 case GameState.Loading:
                     SceneManager.SetScene(new GameScene(this));
                     break;
@@ -58,22 +64,11 @@ namespace Tetris
                 SceneManager.UpdateScene();
                 SceneManager.DrawScene();
 
-                //LoopAudio(backgroundMusic);
-
                 Raylib.EndDrawing();
             }
 
             Raylib.CloseAudioDevice();
-
             Raylib.CloseWindow();
-        }
-
-        public void LoopAudio(Sound sound)
-        {
-            if (!Raylib.IsSoundPlaying(sound))
-            {
-                Raylib.PlaySound(sound);
-            }
         }
     }
 

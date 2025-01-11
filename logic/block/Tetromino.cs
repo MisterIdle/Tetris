@@ -195,7 +195,7 @@ namespace Tetris
                 }
             }
 
-            Raylib.PlaySound(gameScene.blockplace);
+            Raylib.PlaySound(SoundManager.blockplace);
 
             gameScene.currentTetromino = gameScene.nextTetromino;
             gameScene.nextTetromino = gameScene.GenerateRandomTetromino();
