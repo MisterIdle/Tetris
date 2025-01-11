@@ -27,7 +27,6 @@ namespace Tetris
             this.color = color;
         }
 
-        // Draw the block
         public void DrawBlock(int x, int y, Color color)
         {
             int drawX = gameScene.MARGIN_X + x * GameScene.CELL_SIZE;
@@ -53,7 +52,6 @@ namespace Tetris
             Raylib.DrawRectangle(drawX + 3, drawY + GameScene.CELL_SIZE - 6, GameScene.CELL_SIZE - 6, 3, Raylib.ColorAlpha(Raylib.BLACK, 0.3f));
         }
 
-        // Draw the tetromino
         public void DrawTetromino()
         {
             for (int i = 0; i < shape.GetLength(0); i++)

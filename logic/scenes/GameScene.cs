@@ -24,6 +24,12 @@ public class GameScene : Scene
 
     private Color textColor = new Color(255, 255, 255, 255);
 
+    private Color menuButtonColor = new Color(75, 100, 125, 255);
+    private Color menuButtonOverColor = new Color(65, 85, 110, 255);
+
+    private Color quitButtonColor = new Color(125, 75, 75, 255);
+    private Color quitButtonOverColor = new Color(110, 65, 65, 255);
+
     private int score = 0;
     public int level = 1;
     private int lines = 0;
@@ -39,42 +45,61 @@ public class GameScene : Scene
 
     public override void LoadScene()
     {
-        InitializeGrid();
+        if (gameLoop.currentState == GameState.Loading)
+        {
+            InitializeGrid();
+            currentTetromino = GenerateRandomTetromino();
+            nextTetromino = GenerateRandomTetromino();
 
-        currentTetromino = GenerateRandomTetromino();
-        nextTetromino = GenerateRandomTetromino();
+            gameLoop.ChangeState(GameState.Playing);
+        }
     }
 
     public override void UpdateScene()
-    {
+    {    
         if (gameLoop.currentState == GameState.Playing)
         {
             currentTetromino.Update();
             currentTetromino.HandleInput();
         }
-
+    
         CheckLines();
         CheckGameOver();
+    
+        if (Raylib.IsKeyPressed(KeyboardKey.KEY_P) && gameLoop.currentState == GameState.Playing)
+        {
+            gameLoop.ChangeState(GameState.Paused);
+        }
     }
 
     public override void DrawScene()
     {
+        if (gameLoop.currentState == GameState.Loading)
+        {
+            Raylib.ClearBackground(gameLoop.backgroundColor);
+            Raylib.DrawText("Loading...", GameLoop.SCREEN_WIDTH / 2 - 50, GameLoop.SCREEN_HEIGHT / 2 - 10, 20, textColor);
+            return;
+        }
+
         DrawGrid();
         DrawHUD();
 
         if (gameLoop.currentState == GameState.GameOver)
         {
             DrawGameOver();
-            HandleGameOverInput();
-        } 
-        else
-        {
-            currentTetromino.DrawShadowTetromino();
-            currentTetromino.DrawPlacedTetromino();
-            currentTetromino.DrawTetromino();
+            return;
         }
-    }
 
+        if (gameLoop.currentState == GameState.Paused)
+        {
+            DrawPause();
+            return;
+        }
+
+        currentTetromino.DrawShadowTetromino();
+        currentTetromino.DrawPlacedTetromino();
+        currentTetromino.DrawTetromino();
+    }
 
     private void InitializeGrid()
     {
@@ -125,9 +150,6 @@ public class GameScene : Scene
             Raylib.WaitTime(blinkDuration);
         }
     }
-
-    private float gameOverAnimationTime = 0;
-    private float gameOverAnimationDuration = 1.5f;
 
     public void CheckLines()
     {
@@ -195,7 +217,6 @@ public class GameScene : Scene
 
     private void CheckGameOver()
     {
-        // Si le tetromino actuel est en collision dès le spawn alors c'est game over
         if (currentTetromino.CheckCollision())
         {
             gameLoop.ChangeState(GameState.GameOver);
@@ -229,7 +250,6 @@ public class GameScene : Scene
         }
     }
 
-    // HUD
     private void DrawHUD()
     {
         DrawDegradedBackground(GameLoop.SCREEN_WIDTH / 2 + 100, 0, GameLoop.SCREEN_WIDTH / 2 - 100, GameLoop.SCREEN_HEIGHT, gridColor);
@@ -255,7 +275,8 @@ public class GameScene : Scene
     private void DrawScoreHUD()
     {
         Raylib.DrawTextEx(gameLoop.font, "SCORE", new Vector2(GameLoop.SCREEN_WIDTH / 2 + 130, 30), 30, 0, textColor);
-        Raylib.DrawTextEx(gameLoop.font, score.ToString(), new Vector2(GameLoop.SCREEN_WIDTH / 2 + 130, 80), 30, 0, textColor);
+        string scoreText = score.ToString().Length > 6 ? "GLITCH" : score.ToString();
+        Raylib.DrawTextEx(gameLoop.font, scoreText, new Vector2(GameLoop.SCREEN_WIDTH / 2 + 130, 80), 30, 0, textColor);
     }
 
     private void DrawLevelHUD()
@@ -270,24 +291,59 @@ public class GameScene : Scene
         Raylib.DrawTextEx(gameLoop.font, lines.ToString(), new Vector2(GameLoop.SCREEN_WIDTH / 2 + 130, 320), 30, 0, textColor);
     }
 
-    private void DrawGameOver()
+    private void DrawPause()
     {
-        Raylib.DrawTextEx(gameLoop.font, "GAME OVER", new Vector2(GameLoop.SCREEN_WIDTH / 2 - 215, GameLoop.SCREEN_HEIGHT / 2 - 70), 30, 0, textColor);
-    }
+        Raylib.DrawRectangle(0, 0, GameLoop.SCREEN_WIDTH, GameLoop.SCREEN_HEIGHT, Raylib.ColorAlpha(Raylib.BLACK, 0.5f));
 
-    private void HandleGameOverInput()
-    {
-        if (Raylib.IsKeyPressed(KeyboardKey.KEY_ENTER))
+        string pauseText = "PAUSED";
+        int textSize = 40;
+
+        Vector2 textSizeVector = Raylib.MeasureTextEx(gameLoop.font, pauseText, textSize, 0);
+        Color animatedColor = Raylib.GetFrameTime() % 1.0f > 0.5f ? Raylib.GRAY : textColor;
+
+        Raylib.DrawTextEx(gameLoop.font, pauseText, new Vector2(GameLoop.SCREEN_WIDTH / 2 - textSizeVector.X / 2 - 80, GameLoop.SCREEN_HEIGHT / 2 - 150), textSize, 0, animatedColor);
+
+        CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 180, GameLoop.SCREEN_HEIGHT / 2 - 50, 200, 50, "RESUME", 20, menuButtonColor, menuButtonOverColor, textColor, gameLoop.font, () =>
         {
             gameLoop.ChangeState(GameState.Playing);
-            InitializeGrid();
-            currentTetromino = GenerateRandomTetromino();
-            nextTetromino = GenerateRandomTetromino();
-            score = 0;
-            level = 1;
-            lines = 0;
+        });
 
-            Console.WriteLine("Game restarted");
-        }
+        CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 180, GameLoop.SCREEN_HEIGHT / 2 + 20, 200, 50, "MAIN MENU", 20, menuButtonColor, menuButtonOverColor, textColor, gameLoop.font, () =>
+        {
+            gameLoop.ChangeState(GameState.Menu);
+        });
+
+        CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 180, GameLoop.SCREEN_HEIGHT / 2 + 150, 200, 50, "QUIT GAME", 20, quitButtonColor, quitButtonOverColor, textColor, gameLoop.font, () =>
+        {
+            Raylib.CloseWindow();
+        });
+    }
+
+    private void DrawGameOver()
+    {
+        Raylib.DrawRectangle(0, 0, GameLoop.SCREEN_WIDTH, GameLoop.SCREEN_HEIGHT, Raylib.ColorAlpha(Raylib.BLACK, 0.5f));
+
+        string pauseText = "GAME OVER";
+        int textSize = 40;
+
+        Vector2 textSizeVector = Raylib.MeasureTextEx(gameLoop.font, pauseText, textSize, 0);
+        Color animatedColor = Raylib.GetFrameTime() % 1.0f > 0.5f ? Raylib.GRAY : textColor;
+
+        Raylib.DrawTextEx(gameLoop.font, pauseText, new Vector2(GameLoop.SCREEN_WIDTH / 2 - textSizeVector.X / 2 - 85, GameLoop.SCREEN_HEIGHT / 2 - 150), textSize, 0, animatedColor);
+
+        CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 180, GameLoop.SCREEN_HEIGHT / 2 - 50, 200, 50, "RESTART", 20, menuButtonColor, menuButtonOverColor, textColor, gameLoop.font, () =>
+        {
+            gameLoop.ChangeState(GameState.Loading);
+        });
+
+        CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 180, GameLoop.SCREEN_HEIGHT / 2 + 20, 200, 50, "MAIN MENU", 20, menuButtonColor, menuButtonOverColor, textColor, gameLoop.font, () =>
+        {
+            gameLoop.ChangeState(GameState.Menu);
+        });
+
+        CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 180, GameLoop.SCREEN_HEIGHT / 2 + 150, 200, 50, "QUIT GAME", 20, quitButtonColor, quitButtonOverColor, textColor, gameLoop.font, () =>
+        {
+            Raylib.CloseWindow();
+        });
     }
 }

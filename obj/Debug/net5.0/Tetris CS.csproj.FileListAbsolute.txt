@@ -27,3 +27,4 @@ C:\Users\Alexy\Desktop\Tetris CS\obj\Debug\net5.0\refint\Tetris CS.dll
 C:\Users\Alexy\Desktop\Tetris CS\obj\Debug\net5.0\Tetris CS.pdb
 C:\Users\Alexy\Desktop\Tetris CS\obj\Debug\net5.0\Tetris CS.genruntimeconfig.cache
 C:\Users\Alexy\Desktop\Tetris CS\obj\Debug\net5.0\ref\Tetris CS.dll
+C:\Users\Alexy\Desktop\Tetris CS\obj\Debug\net5.0\Tetris CS.sourcelink.json

@@ -17,7 +17,7 @@ namespace Tetris
 
             font = Raylib.LoadFont("font/Font.ttf");
 
-            currentState = GameState.Playing;
+            currentState = GameState.Loading;
             SceneManager.SetScene(new GameScene(this));
         }
 
@@ -25,7 +25,7 @@ namespace Tetris
         {
             switch (currentState)
             {
-                case GameState.Playing:
+                case GameState.Loading:
                     SceneManager.SetScene(new GameScene(this));
                     break;
             }
@@ -63,7 +63,9 @@ namespace Tetris
     public enum GameState
     {
         Menu,
+        Loading,
         Playing,
+        Paused,
         GameOver
     }
 }

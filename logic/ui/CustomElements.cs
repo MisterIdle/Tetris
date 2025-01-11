@@ -1,40 +1,27 @@
 using System;
+using System.Numerics;
 using Raylib_CsLo;
 
 namespace Tetris
 {
     public class CustomElements
     {
-        public static void Button(int x, int y, int width, int height, string text, Color color, Action action)
+        public static void Button(int x, int y, int width, int height, string text, int size, Color color, Color overColor, Color textColor, Font font, Action onClick)
         {
-            Raylib.DrawRectangleRounded(new Rectangle(x, y, width, height), 0.2f, 10, color);
-            Raylib.DrawText(text, x + 10, y + 10, 20, Raylib.WHITE);
-
             if (Raylib.CheckCollisionPointRec(Raylib.GetMousePosition(), new Rectangle(x, y, width, height)))
             {
-                Raylib.DrawRectangleRounded(new Rectangle(x, y, width, height), 0.2f, 10, Raylib.ColorAlpha(Raylib.WHITE, 0.3f));
-
-                if (Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_RIGHT) || Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
+                Raylib.DrawRectangle(x, y, width, height, overColor);
+                if (Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
                 {
-                    action();
+                    onClick();
                 }
             }
-        }
-
-        public static void UpDownButton(int x, int y, int width, int height, string text, Color color, Action action)
-        {
-            Raylib.DrawRectangleRounded(new Rectangle(x, y, width, height), 0.2f, 10, color);
-            Raylib.DrawText(text, x + 10, y + 10, 20, Raylib.WHITE);
-
-            if (Raylib.CheckCollisionPointRec(Raylib.GetMousePosition(), new Rectangle(x, y, width, height)))
+            else
             {
-                Raylib.DrawRectangleRounded(new Rectangle(x, y, width, height), 0.2f, 10, Raylib.ColorAlpha(Raylib.WHITE, 0.3f));
-
-                if (Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_RIGHT) || Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
-                {
-                    action();
-                }
+                Raylib.DrawRectangle(x, y, width, height, color);
             }
+            Vector2 textSize = Raylib.MeasureTextEx(font, text, size, 0);
+            Raylib.DrawTextEx(font, text, new Vector2(x + width / 2 - textSize.X / 2, y + height / 2 - textSize.Y / 2), size, 0, textColor);
         }
     }
 }
