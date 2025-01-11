@@ -6,13 +6,13 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v5.0": {
-      "Tetris/1.0.0": {
+      "Tetris CS/1.0.0": {
         "dependencies": {
           "Newtonsoft.Json": "13.0.3",
           "Raylib-CsLo": "4.2.0.9"
         },
         "runtime": {
-          "Tetris.dll": {}
+          "Tetris CS.dll": {}
         }
       },
       "Microsoft.Toolkit.HighPerformance/7.1.2": {
@@ -92,7 +92,7 @@
     }
   },
   "libraries": {
-    "Tetris/1.0.0": {
+    "Tetris CS/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

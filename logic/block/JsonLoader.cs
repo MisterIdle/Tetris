@@ -1,4 +1,3 @@
-
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
@@ -7,16 +6,16 @@ using Raylib_CsLo;
 namespace Tetris {
     class JsonLoader
     {
-        public static List<Block> LoadFromJson(string filePath)
+        public static List<Tetromino> LoadFromJson(string filePath)
         {
             string jsonString = File.ReadAllText(filePath);
             List<TetrominoData> tetrominoData = JsonConvert.DeserializeObject<List<TetrominoData>>(jsonString);
 
-            List<Block> blocks = new List<Block>();
+            List<Tetromino> blocks = new List<Tetromino>();
 
             foreach (TetrominoData data in tetrominoData)
             {
-                blocks.Add(new Block(0, 0, data.Shape, new Color(data.Color[0], data.Color[1], data.Color[2], 255)));
+                blocks.Add(new Tetromino(null, 0, 0, data.Shape, new Color(data.Color[0], data.Color[1], data.Color[2], 255)));
             }
 
             return blocks;
