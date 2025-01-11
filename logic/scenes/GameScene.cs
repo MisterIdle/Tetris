@@ -30,6 +30,11 @@ public class GameScene : Scene
     private Color quitButtonColor = new Color(125, 75, 75, 255);
     private Color quitButtonOverColor = new Color(110, 65, 65, 255);
 
+    public Sound blockplace;
+    public Sound lineclear;
+    public Sound levelup;
+    public Sound lose;
+
     private int score = 0;
     public int level = 1;
     private int lines = 0;
@@ -50,6 +55,11 @@ public class GameScene : Scene
             InitializeGrid();
             currentTetromino = GenerateRandomTetromino();
             nextTetromino = GenerateRandomTetromino();
+
+            blockplace = Raylib.LoadSound("audio/blockplace.wav");
+            lineclear = Raylib.LoadSound("audio/lineclear.wav");
+            levelup = Raylib.LoadSound("audio/levelup.wav");
+            lose = Raylib.LoadSound("audio/lose.wav");
 
             gameLoop.ChangeState(GameState.Playing);
         }
@@ -144,6 +154,8 @@ public class GameScene : Scene
 
             DrawScene();
 
+            Raylib.PlaySound(lineclear);
+
             Raylib.EndDrawing();
             Raylib.BeginDrawing();
             Raylib.ClearBackground(gameLoop.backgroundColor);
@@ -190,6 +202,7 @@ public class GameScene : Scene
             if (lines >= level * 10)
             {
                 level++;
+                Raylib.PlaySound(levelup);
             }
         }
     }
@@ -219,6 +232,11 @@ public class GameScene : Scene
     {
         if (currentTetromino.CheckCollision())
         {
+            if (gameLoop.currentState != GameState.GameOver)
+            {
+                Raylib.PlaySound(lose);
+            }
+            
             gameLoop.ChangeState(GameState.GameOver);
         }
     }
