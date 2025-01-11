@@ -10,13 +10,9 @@ namespace Tetris
         public Font font;
         public GameState currentState;
 
-        public float masterVolume = 0.5f;
-        public float musicVolume = 0.5f;
-        public float sfxVolume = 0.5f;
-
         private void Init()
         {
-            Raylib.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Tetris");
+            Raylib.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Tetris - By MisterIdle");
             Raylib.SetTargetFPS(60);
 
             Raylib.InitAudioDevice();
@@ -24,6 +20,7 @@ namespace Tetris
             font = Raylib.LoadFont("font/Font.ttf");
 
             SoundManager.LoadSound();
+            Settings.LoadSettings();
 
             currentState = GameState.Menu;
             SceneManager.SetScene(new GameMenu(this));
@@ -70,14 +67,5 @@ namespace Tetris
             Raylib.CloseAudioDevice();
             Raylib.CloseWindow();
         }
-    }
-
-    public enum GameState
-    {
-        Menu,
-        Loading,
-        Playing,
-        Paused,
-        GameOver
     }
 }

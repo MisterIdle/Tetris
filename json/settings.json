@@ -1,0 +1,10 @@
+{
+  "shadow": true,
+  "placedBlocks": true,
+  "nextBlock": true,
+  "randomMovement": false,
+  "level": 1,
+  "masterVolume": 0.14666666,
+  "musicVolume": 1.0,
+  "sfxVolume": 1.0
+}

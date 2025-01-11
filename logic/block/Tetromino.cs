@@ -16,6 +16,9 @@ namespace Tetris
         private float fastFallSpeed = 20f;
         private float fallDelta = 0.0f;
 
+        private float moveDelta = 0.0f;
+        private float moveInterval = Raylib.GetRandomValue(1, 3);
+
         private GameScene gameScene;
 
         public Tetromino(GameScene gameScene, int x, int y, int[,] shape, Color color)
@@ -141,6 +144,32 @@ namespace Tetris
             {
                 x = prevX;
                 y = prevY;
+            }
+        }
+
+        public void MoveTetrominoRandomly()
+        {
+            moveDelta += Raylib.GetFrameTime();
+
+            if (moveDelta >= moveInterval)
+            {
+            int random = Raylib.GetRandomValue(0, 3);
+
+            if (random == 0)
+            {
+                MoveTetromino(-1, 0);
+            }
+            else if (random == 1)
+            {
+                MoveTetromino(1, 0);
+            }
+            else if (random == 2)
+            {
+                RotateTetromino();
+            }
+
+            moveDelta = 0.0f;
+            moveInterval = Raylib.GetRandomValue(1, 3);
             }
         }
 

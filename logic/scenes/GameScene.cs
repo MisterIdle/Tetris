@@ -31,6 +31,8 @@ public class GameScene : Scene
     private Color quitButtonOverColor = new Color(110, 65, 65, 255);
 
     private int score = 0;
+    private int scoreMultiplier = 1;
+
     public int level = 1;
     private int lines = 0;
 
@@ -48,8 +50,16 @@ public class GameScene : Scene
         if (gameLoop.currentState == GameState.Loading)
         {
             InitializeGrid();
+            ScoreMultiplier();
+
+            SoundManager.StopAllAudio();
+            
+            SoundManager.LoopAudio(SoundManager.backgroundMusicGame);
+
             currentTetromino = GenerateRandomTetromino();
             nextTetromino = GenerateRandomTetromino();
+
+            level = Settings.level;
 
             gameLoop.ChangeState(GameState.Playing);
         }
@@ -96,8 +106,15 @@ public class GameScene : Scene
             return;
         }
 
-        currentTetromino.DrawShadowTetromino();
-        currentTetromino.DrawPlacedTetromino();
+        if (Settings.shadow)
+            currentTetromino.DrawShadowTetromino();
+
+        if (Settings.placedBlocks)
+            currentTetromino.DrawPlacedTetromino();
+
+        if (Settings.randomMovement)
+            currentTetromino.MoveTetrominoRandomly();
+
         currentTetromino.DrawTetromino();
     }
 
@@ -244,18 +261,43 @@ public class GameScene : Scene
         switch (lines)
         {
             case 1:
-                score += 40 * level;
+                score += 40 * level * scoreMultiplier;
                 break;
             case 2:
-                score += 100 * level;
+                score += 100 * level * scoreMultiplier;
                 break;
             case 3:
-                score += 300 * level;
+                score += 300 * level * scoreMultiplier;
                 break;
             case 4:
-                score += 1200 * level;
+                score += 1200 * level * scoreMultiplier;
                 break;
         }
+    }
+
+    private void ScoreMultiplier()
+    {
+        if (!Settings.nextBlock)
+        {
+            scoreMultiplier *= 2;
+        }
+
+        if (!Settings.shadow)
+        {
+            scoreMultiplier *= 2;
+        }
+
+        if (!Settings.placedBlocks)
+        {
+            scoreMultiplier *= 5;
+        }
+
+        if (Settings.randomMovement)
+        {
+            scoreMultiplier *= 3;
+        }
+
+        Console.WriteLine("Score Multiplier: " + scoreMultiplier);
     }
 
     private void DrawHUD()
@@ -274,10 +316,12 @@ public class GameScene : Scene
 
     private void DrawNextTetrominoHUD()
     {
-        Raylib.DrawTextEx(gameLoop.font, "NEXT", new Vector2(GameLoop.SCREEN_WIDTH / 2 + 130, 440), 40, 0, textColor);
+        if (Settings.nextBlock)
+        {
+            Raylib.DrawTextEx(gameLoop.font, "NEXT", new Vector2(GameLoop.SCREEN_WIDTH / 2 + 130, 440), 40, 0, textColor);
 
-        nextTetromino.DrawNextTetromino(13, 16);
-
+            nextTetromino.DrawNextTetromino(13, 16);
+        }
     }
 
     private void DrawScoreHUD()

@@ -7,6 +7,7 @@ namespace Tetris
     public class SoundManager
     {
         public static Sound backgroundMusicGame;
+        public static Sound backgroundMusicMenu;
         public static Sound blockplace;
         public static Sound lineclear;
         public static Sound levelup;
@@ -22,13 +23,17 @@ namespace Tetris
             levelup = Raylib.LoadSound("audio/levelup.wav");
             lose = Raylib.LoadSound("audio/lose.wav");
 
-            backgroundMusicGame = Raylib.LoadSound("audio/Theme.mp3");
+            backgroundMusicMenu = Raylib.LoadSound("audio/ThemeMenu.mp3");
+            backgroundMusicGame = Raylib.LoadSound("audio/ThemeGame.mp3");
 
             music.Add(backgroundMusicGame);
+            music.Add(backgroundMusicMenu);
+
             sfx.Add(blockplace);
             sfx.Add(lineclear);
             sfx.Add(levelup);
             sfx.Add(lose);
+
         }
 
         public static void LoopAudio(Sound sound)
@@ -39,12 +44,33 @@ namespace Tetris
             }
         }
 
+        public static void StopAllAudio()
+        {
+            foreach (Sound sound in music)
+            {
+                Raylib.StopSound(sound);
+            }
+
+            foreach (Sound sound in sfx)
+            {
+                Raylib.StopSound(sound);
+            }
+        }
+
+        public static void ChangeVolumeMaster(float masterVolume)
+        {
+            Raylib.SetMasterVolume(masterVolume);
+            Settings.SaveSettings();
+        }
+
         public static void ChangeVolumeMusic(float musicVolume)
         {
             foreach (Sound sound in music)
             {
                 Raylib.SetSoundVolume(sound, musicVolume);
             }
+
+            Settings.SaveSettings();
         }       
 
         public static void ChangeSFXVolume(float sfxVolume)
@@ -53,6 +79,8 @@ namespace Tetris
             {
                 Raylib.SetSoundVolume(sound, sfxVolume);
             }
+
+            Settings.SaveSettings();
         }
 
     }
