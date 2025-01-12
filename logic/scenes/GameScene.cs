@@ -335,14 +335,18 @@ namespace Tetris.Scene
 
         private void CheckGameOver()
         {
-            if (currentTetromino.CheckCollision())
+            for (int j = 0; j < GRID_WIDTH; j++)
             {
-                if (gameLoop.currentState != GameState.GameOver)
+                if (grid[0, j] != 0 || grid[1, j] != 0)
                 {
-                    Raylib.PlaySound(SoundManager.lose);
-                }
+                    if (gameLoop.currentState != GameState.GameOver)
+                    {
+                        Raylib.PlaySound(SoundManager.lose);
+                    }
 
-                gameLoop.ChangeState(GameState.GameOver);
+                    gameLoop.ChangeState(GameState.GameOver);
+                    break;
+                }
             }
         }
 
