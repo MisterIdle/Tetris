@@ -100,18 +100,14 @@ namespace Tetris
         {    
             if (gameLoop.currentState == GameState.Playing)
             {
-                currentTetromino.Update();
-                currentTetromino.HandleInput();
+            currentTetromino.Update();
+            currentTetromino.HandleInput();
 
-                if (aiPlaying)
-                {
-                    (int bestX, int bestY, int bestRotation) = bot.GetBestMove(grid, currentTetromino);
-
-                    if (iaPlayingUltraSpeed)
-                        currentTetromino.MoveTo(bestX, bestY, bestRotation, true);
-                    else
-                        currentTetromino.MoveTo(bestX, bestY, bestRotation, false);
-                }
+            if (aiPlaying)
+            {
+                var (bestX, bestY, bestRotation) = bot.GetBestMove(grid, currentTetromino);
+                currentTetromino.MoveTo(bestX, bestY, bestRotation, iaPlayingUltraSpeed);
+            }
             }
 
             SoundManager.LoopAudio(SoundManager.backgroundMusicGame);
@@ -119,13 +115,9 @@ namespace Tetris
             CheckLines();
             CheckGameOver();
 
-            if ((Raylib.IsKeyPressed(KeyboardKey.KEY_P) || Raylib.IsKeyPressed(KeyboardKey.KEY_ESCAPE)) && gameLoop.currentState == GameState.Playing)
+            if (Raylib.IsKeyPressed(KeyboardKey.KEY_P) || Raylib.IsKeyPressed(KeyboardKey.KEY_ESCAPE))
             {
-                gameLoop.ChangeState(GameState.Paused);
-            } 
-            else if ((Raylib.IsKeyPressed(KeyboardKey.KEY_P) || Raylib.IsKeyPressed(KeyboardKey.KEY_ESCAPE)) && gameLoop.currentState == GameState.Paused)
-            {
-                gameLoop.ChangeState(GameState.Playing);
+                gameLoop.ChangeState(gameLoop.currentState == GameState.Playing ? GameState.Paused : GameState.Playing);
             }
 
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_F9))
@@ -466,6 +458,11 @@ namespace Tetris
             CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 180, GameLoop.SCREEN_HEIGHT / 2 + 20, 200, 50, "SAVE", 20, menuButtonColor, menuButtonOverColor, textColor, gameLoop.font, () =>
             {
                 Save.SaveGame(this);
+                
+                Raylib.DrawTextEx(gameLoop.font, "Game saved!", new Vector2(GameLoop.SCREEN_WIDTH / 2 - 180, GameLoop.SCREEN_HEIGHT / 2 - 90), 20, 0, textColor);
+                Raylib.BeginDrawing();
+                Raylib.EndDrawing();
+                Raylib.WaitTime(0.5f);
             });
 
             CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 180, GameLoop.SCREEN_HEIGHT / 2 + 90, 200, 50, "MAIN MENU", 20, menuButtonColor, menuButtonOverColor, textColor, gameLoop.font, () =>
