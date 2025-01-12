@@ -154,7 +154,7 @@ namespace Tetris.Scene
             CheckLines();
             CheckGameOver();
 
-            if (Raylib.IsKeyPressed(KeyboardKey.KEY_P) || Raylib.IsKeyPressed(KeyboardKey.KEY_ESCAPE))
+            if ((Raylib.IsKeyPressed(KeyboardKey.KEY_P) || Raylib.IsKeyPressed(KeyboardKey.KEY_ESCAPE)) && gameLoop.currentState != GameState.GameOver)
             {
                 gameLoop.ChangeState(gameLoop.currentState == GameState.Playing ? GameState.Paused : GameState.Playing);
             }

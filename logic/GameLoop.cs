@@ -23,7 +23,7 @@ namespace Tetris
             Raylib.InitAudioDevice();
             Raylib.SetExitKey(-1);
 
-            font = Raylib.LoadFont("font/Font.ttf");
+            font = Raylib.LoadFont("font/font.ttf");
             icon = Raylib.LoadImage("icon/icon.png");
 
             Raylib.SetWindowIcon(icon);
