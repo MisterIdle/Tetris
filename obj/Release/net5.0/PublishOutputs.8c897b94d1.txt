@@ -1,5 +1,5 @@
 C:\Users\Alexy\Desktop\Tetris\bin\Release\net5.0\publish\Tetris.exe
-C:\Users\Alexy\Desktop\Tetris\bin\Release\net5.0\publish\font\Font.ttf
+C:\Users\Alexy\Desktop\Tetris\bin\Release\net5.0\publish\font\font.ttf
 C:\Users\Alexy\Desktop\Tetris\bin\Release\net5.0\publish\json\block\blocks.json
 C:\Users\Alexy\Desktop\Tetris\bin\Release\net5.0\publish\json\block\gnowius.json
 C:\Users\Alexy\Desktop\Tetris\bin\Release\net5.0\publish\json\settings.json
