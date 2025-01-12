@@ -1,9 +1,7 @@
-using System;
 using Raylib_CsLo;
 
 namespace Tetris
 {
-
     public class Tetromino
     {
         public int x;
@@ -96,6 +94,7 @@ namespace Tetris
             }
         }
 
+
         public void DrawShadowTetromino()
         {
             int shadowY = y;
@@ -112,20 +111,6 @@ namespace Tetris
                     if (shape[i, j] == 1)
                     {
                         DrawBlock(x + j, shadowY + i, Raylib.ColorAlpha(Raylib.BLACK, 0.1f));
-                    }
-                }
-            }
-        }
-
-        public void DrawIATetromino()
-        {
-            for (int i = 0; i < shape.GetLength(0); i++)
-            {
-                for (int j = 0; j < shape.GetLength(1); j++)
-                {
-                    if (shape[i, j] == 1)
-                    {
-                        DrawBlock(x + j, y + i, color);
                     }
                 }
             }

@@ -8,6 +8,7 @@ namespace Tetris
         public const int SCREEN_HEIGHT = 600;
         public Color backgroundColor = new Color(17, 24, 38, 255);
         public Font font;
+        public Image icon;
         public GameState currentState;
 
         private void Init()
@@ -20,6 +21,9 @@ namespace Tetris
             Raylib.SetExitKey(-1);
 
             font = Raylib.LoadFont("font/Font.ttf");
+            icon = Raylib.LoadImage("icon/icon.png");
+
+            Raylib.SetWindowIcon(icon);
 
             SoundManager.LoadSound();
             Settings.LoadSettings();
@@ -70,14 +74,8 @@ namespace Tetris
             }
 
             Raylib.CloseAudioDevice();
-            Raylib.CloseWindow();
-        }
-
-        public void Quit()
-        {
-            Raylib.EndDrawing();
-            Raylib.CloseAudioDevice();
             Raylib.UnloadFont(font);
+            Raylib.UnloadImage(icon);
             Raylib.CloseWindow();
         }
     }

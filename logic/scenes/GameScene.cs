@@ -316,24 +316,12 @@ namespace Tetris
             int index = random.Next(combinedBlocks.Count);
             var randomBlock = combinedBlocks[index];
 
-            return new Tetromino(
-                this,
-                GRID_WIDTH / 2 - randomBlock.shape.GetLength(1) / 2,
-                0,
-                randomBlock.shape,
-                randomBlock.color
-            );
+            return new Tetromino(this, GRID_WIDTH / 2 - randomBlock.shape.GetLength(1) / 2, 0, randomBlock.shape, randomBlock.color);
         }
 
         public Tetromino GenerateSavedTetromino(TetrominoData tetrominoData)
         {
-            return new Tetromino(
-                this,
-                GRID_WIDTH / 2 - tetrominoData.Shape.GetLength(1) / 2,
-                0,
-                tetrominoData.Shape,
-                new Color(tetrominoData.Color[0], tetrominoData.Color[1], tetrominoData.Color[2], tetrominoData.Color[3])
-            );
+            return new Tetromino(this, GRID_WIDTH / 2 - tetrominoData.Shape.GetLength(1) / 2, 0, tetrominoData.Shape, new Color(tetrominoData.Color[0], tetrominoData.Color[1], tetrominoData.Color[2], tetrominoData.Color[3]));
         }
 
 

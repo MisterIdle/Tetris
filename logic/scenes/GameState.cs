@@ -5,5 +5,5 @@
         Loading,
         Playing,
         Paused,
-        GameOver
+        GameOver,
     }

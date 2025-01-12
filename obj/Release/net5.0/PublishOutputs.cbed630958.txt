@@ -1,0 +1,27 @@
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\Tetris CS.exe
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\font\Font.ttf
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\json\block\blocks.json
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\json\block\gnowius.json
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\json\settings.json
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\audio\blockplace.wav
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\audio\levelup.wav
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\audio\lineclear.wav
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\audio\lose.wav
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\audio\ThemeGame.mp3
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\audio\ThemeMenu.mp3
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\Tetris CS.dll
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\Tetris CS.deps.json
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\Tetris CS.runtimeconfig.json
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\Tetris CS.pdb
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\Microsoft.Toolkit.HighPerformance.dll
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\Newtonsoft.Json.dll
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\Raylib-CsLo.dll
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\runtimes\linux-x64\native\libraylib.so
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\runtimes\linux-x64\native\readme.md
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\runtimes\osx-arm64\native\libraylib.dylib
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\runtimes\osx-arm64\native\readme.md
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\runtimes\osx-x64\native\libraylib.dylib
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\runtimes\osx-x64\native\readme.md
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\runtimes\win-x64\native\raylib.dll
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\runtimes\win-x64\native\raylib.pdb
+C:\Users\Alexy\Desktop\Tetris CS\bin\Release\net5.0\publish\runtimes\win-x86\native\needs-pr.txt

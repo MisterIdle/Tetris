@@ -28,3 +28,13 @@ C:\Users\Alexy\Desktop\Tetris CS\obj\Debug\net5.0\Tetris CS.pdb
 C:\Users\Alexy\Desktop\Tetris CS\obj\Debug\net5.0\Tetris CS.genruntimeconfig.cache
 C:\Users\Alexy\Desktop\Tetris CS\obj\Debug\net5.0\ref\Tetris CS.dll
 C:\Users\Alexy\Desktop\Tetris CS\obj\Debug\net5.0\Tetris CS.sourcelink.json
+C:\Users\Alexy\Desktop\Tetris CS\bin\Debug\net5.0\font\Font.ttf
+C:\Users\Alexy\Desktop\Tetris CS\bin\Debug\net5.0\json\block\blocks.json
+C:\Users\Alexy\Desktop\Tetris CS\bin\Debug\net5.0\json\block\gnowius.json
+C:\Users\Alexy\Desktop\Tetris CS\bin\Debug\net5.0\json\settings.json
+C:\Users\Alexy\Desktop\Tetris CS\bin\Debug\net5.0\audio\blockplace.wav
+C:\Users\Alexy\Desktop\Tetris CS\bin\Debug\net5.0\audio\levelup.wav
+C:\Users\Alexy\Desktop\Tetris CS\bin\Debug\net5.0\audio\lineclear.wav
+C:\Users\Alexy\Desktop\Tetris CS\bin\Debug\net5.0\audio\lose.wav
+C:\Users\Alexy\Desktop\Tetris CS\bin\Debug\net5.0\audio\ThemeGame.mp3
+C:\Users\Alexy\Desktop\Tetris CS\bin\Debug\net5.0\audio\ThemeMenu.mp3
