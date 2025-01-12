@@ -73,7 +73,7 @@ namespace Tetris
             Settings.SaveSettings();
         }       
 
-        public static void ChangeSFXVolume(float sfxVolume)
+        public static void ChangeVolumeSFX(float sfxVolume)
         {
             foreach (Sound sound in sfx)
             {

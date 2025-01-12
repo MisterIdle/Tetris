@@ -12,6 +12,8 @@ namespace Tetris
         public int[,] shape;
         public Color color;
 
+        public int rotation = 0;
+
         private float fallSpeed = 1.0f;
         private float fastFallSpeed = 20f;
         private float fallDelta = 0.0f;
@@ -118,6 +120,20 @@ namespace Tetris
             }
         }
 
+        public void DrawIATetromino()
+        {
+            for (int i = 0; i < shape.GetLength(0); i++)
+            {
+                for (int j = 0; j < shape.GetLength(1); j++)
+                {
+                    if (shape[i, j] == 1)
+                    {
+                        DrawBlock(x + j, y + i, color);
+                    }
+                }
+            }
+        }
+
         public void DrawPlacedTetromino()
         {
             for (int i = 0; i < GameScene.GRID_HEIGHT; i++)
@@ -153,23 +169,26 @@ namespace Tetris
 
             if (moveDelta >= moveInterval)
             {
-            int random = Raylib.GetRandomValue(0, 3);
 
-            if (random == 0)
-            {
-                MoveTetromino(-1, 0);
-            }
-            else if (random == 1)
-            {
-                MoveTetromino(1, 0);
-            }
-            else if (random == 2)
-            {
-                RotateTetromino();
-            }
+                int random = Raylib.GetRandomValue(0, 5);
 
-            moveDelta = 0.0f;
-            moveInterval = Raylib.GetRandomValue(1, 3);
+                if (random == 0)
+                    MoveTetromino(-1, 0);
+
+                else if (random == 1)
+                    MoveTetromino(1, 0);
+
+                else if (random == 2)
+                    RotateTetromino();
+
+                else if (random == 3)
+                    SetFallSpeed(fastFallSpeed);
+
+                else if (random == 4)
+                    PlaceTetrominoAsBottom();
+
+                moveDelta = 0.0f;
+                moveInterval = Raylib.GetRandomValue(1, 3);
             }
         }
 
@@ -179,11 +198,11 @@ namespace Tetris
             {
                 y++;
             }
-
+            
             PlaceBlock();
         }
 
-        private void RotateTetromino()
+        public void RotateTetromino()
         {
             int[,] rotatedShape = new int[shape.GetLength(1), shape.GetLength(0)];
 
@@ -202,7 +221,49 @@ namespace Tetris
             {
                 shape = prevShape;
             }
+            
+            else
+            {
+                rotation = (rotation + 1) % 4;
+            }
         }
+
+        public Tetromino Rotate(int rotation)
+        {
+            for (int i = 0; i < rotation; i++)
+            {
+                RotateTetromino();
+            }
+            return this;
+        }
+
+        public void MoveTo(int x, int y, int rotation)
+        {
+            if (this.x < x)
+            {
+                MoveTetromino(1, 0);
+            }
+            else if (this.x > x)
+            {
+                MoveTetromino(-1, 0);
+            }
+
+            for (int i = 0; i < rotation; i++)
+            {
+                RotateTetromino();
+            }
+
+            if (this.x == x && this.y == y && this.rotation == rotation)
+            {
+                return;
+            }
+        }
+
+        public Tetromino Clone()
+        {
+            return new Tetromino(gameScene, x, y, shape, color);
+        }
+
 
         private void PlaceBlock()
         {
@@ -243,7 +304,7 @@ namespace Tetris
                         int checkX = x + j;
                         int checkYLocal = checkY + i;
 
-                        if (checkYLocal >= GameScene.GRID_HEIGHT || checkX < 0 || checkX >= GameScene.GRID_WIDTH || gameScene.grid[checkYLocal, checkX] != 0)
+                        if (checkYLocal < 0 || checkYLocal >= GameScene.GRID_HEIGHT || checkX < 0 || checkX >= GameScene.GRID_WIDTH || gameScene.grid[checkYLocal, checkX] != 0)
                         {
                             return true;
                         }

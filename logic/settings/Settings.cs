@@ -9,6 +9,10 @@ namespace Tetris {
         public static bool nextBlock = true;
         public static bool randomMovement = false;
 
+        public static bool normal = true;
+        public static bool gnowius = false;
+        public static bool custom = false;
+
         public static int level = 1;
 
         public static float masterVolume = 1.0f;
@@ -34,6 +38,9 @@ namespace Tetris {
                 nextBlock = nextBlock,
                 randomMovement = randomMovement,
                 level = level,
+                normal = normal,
+                gnowius = gnowius,
+                custom = custom,
                 masterVolume = masterVolume,
                 musicVolume = musicVolume,
                 sfxVolume = sfxVolume
@@ -61,9 +68,17 @@ namespace Tetris {
                 nextBlock = data.nextBlock;
                 randomMovement = data.randomMovement;
                 level = data.level;
+                normal = data.normal;
+                gnowius = data.gnowius;
+                custom = data.custom;
                 masterVolume = data.masterVolume;
                 musicVolume = data.musicVolume;
                 sfxVolume = data.sfxVolume;
+
+                SoundManager.ChangeVolumeSFX(sfxVolume);
+                SoundManager.ChangeVolumeMusic(musicVolume);
+                SoundManager.ChangeVolumeMaster(masterVolume);
+
             } catch (Exception e) {
                 Console.WriteLine($"Error loading settings: {e.Message}");
                 SaveSettings();
@@ -76,6 +91,9 @@ namespace Tetris {
             public bool nextBlock { get; set; }
             public bool randomMovement { get; set; }
             public int level { get; set; }
+            public bool normal { get; set; }
+            public bool gnowius { get; set; }
+            public bool custom { get; set; }
             public float masterVolume { get; set; }
             public float musicVolume { get; set; }
             public float sfxVolume { get; set; }

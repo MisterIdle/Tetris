@@ -26,11 +26,19 @@ namespace Tetris {
         private Color titleColor = new Color(255, 215, 0, 255);
         private Color sideBlockColor = new Color(15, 25, 45, 255);
 
+        private float animationOffset = 0;
+        private float animationSpeed = 0.002f;
+
         private MenuState menuState = MenuState.Main;
+        private MenuState nextMenuState = MenuState.Main;
+        private float transitionAlpha = 0;
+        private bool isTransitioning = false;
 
         enum MenuState {
             Main,
             Settings,
+            AudioSettings,
+            ModdedSettings,
             Credits,
             Play,
         }
@@ -44,12 +52,12 @@ namespace Tetris {
 
             SoundManager.StopAllAudio();
 
-            SoundManager.LoopAudio(SoundManager.backgroundMusicMenu);
-
             gameScene = new GameScene(gameLoop);
         }
 
         public override void UpdateScene() {
+            UpdateTransition();
+            SoundManager.LoopAudio(SoundManager.backgroundMusicMenu);
         }
 
         public override void DrawScene() {
@@ -68,15 +76,59 @@ namespace Tetris {
                     DrawSettings();
                     break;
 
+                case MenuState.AudioSettings:
+                    AudioSettings();
+                    break;
+
+                case MenuState.ModdedSettings:
+                    ModdedSettings();
+                    break;
+
                 case MenuState.Credits:
                     DrawCredits();
                     break;
             }
+
+            if (isTransitioning) {
+                Raylib.DrawRectangle(GameLoop.SCREEN_WIDTH / 3 - 35, 120, GameLoop.SCREEN_WIDTH / 2 - 35, GameLoop.SCREEN_HEIGHT, new Color(gridColor.r, gridColor.g, gridColor.b, (byte)(transitionAlpha * 255)));
+            }
+        }
+
+        private void StartTransition(MenuState newState) {
+            isTransitioning = true;
+            nextMenuState = newState;
+        }
+
+        private void UpdateTransition() {
+            if (isTransitioning) 
+            {
+                transitionAlpha += 0.05f;
+
+                if (transitionAlpha >= 1) {
+                    transitionAlpha = 1;
+                    isTransitioning = false;
+                    menuState = nextMenuState;
+                }
+            } 
+            else 
+            {
+                transitionAlpha -= 0.05f;
+    
+                if (transitionAlpha <= 0) {
+                    transitionAlpha = 0;
+                }
+            }
         }
 
         private void DrawMenu() {
+            animationOffset += animationSpeed;
+           
+            if (animationOffset > 1) animationOffset = 0;
+
             Raylib.DrawRectangle(GameLoop.SCREEN_WIDTH / 3 - 50, 0, GameLoop.SCREEN_WIDTH / 2, GameLoop.SCREEN_HEIGHT, gridColor);
-            Raylib.DrawTextEx(font, "Tetris", new Vector2(GameLoop.SCREEN_WIDTH / 2 - 265 / 2, 50), 45, 0, titleColor);
+            Raylib.DrawTextEx(font, "Tetris", new Vector2(GameLoop.SCREEN_WIDTH / 2 - 265 / 2, 50 + (float)Math.Sin(animationOffset * Math.PI * 2) * 10), 45, 0, titleColor);
+            Raylib.DrawTextEx(font, "Ver 1.0", new Vector2(GameLoop.SCREEN_WIDTH / 2 - 100 / 2, 30 + (float)Math.Sin(animationOffset * Math.PI * 2) * 5), 15, 0, textColor);
+            Raylib.DrawTextEx(font, "by MisterIdle / Alexy", new Vector2(GameLoop.SCREEN_WIDTH / 2 - 120, 100 + (float)Math.Sin(animationOffset * Math.PI * 2) * 5), 12, 0, textColor);
 
             for (int i = 0; i < 20; i++) {
                 Tetromino rightBorder = new Tetromino(gameScene, 50, 0, new int[1, 1], borderColor);
@@ -89,15 +141,15 @@ namespace Tetris {
 
         private void DrawMain() {
             CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 190 / 2, 200, 200, 50, "Play", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
-                menuState = MenuState.Play;
+                StartTransition(MenuState.Play);
             });
 
             CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 190 / 2, 270, 200, 50, "Settings", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
-                menuState = MenuState.Settings;
+                StartTransition(MenuState.Settings);
             });
 
             CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 190 / 2, 340, 200, 50, "Credits", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
-                menuState = MenuState.Credits;
+                StartTransition(MenuState.Credits);
             });
 
             CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 190 / 2, 500, 200, 50, "Quit", 20, quitButtonColor, quitButtonOverColor, textColor, font, () => {
@@ -133,15 +185,34 @@ namespace Tetris {
             });
 
             CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 150 / 2 - 70, 510, 140, 50, "Back", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
-                menuState = MenuState.Main;
+                StartTransition(MenuState.Main);
             });
 
             CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 150 / 2 + 85, 510, 140, 50, "Start", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
-                gameLoop.ChangeState(GameState.Loading);
+                if (!Settings.normal && !Settings.gnowius) {
+                    StartTransition(MenuState.ModdedSettings);
+                } else {
+                    Animation.FadeOut(1);
+                    gameLoop.ChangeState(GameState.Loading);
+                }
             });
         }
 
         private void DrawSettings() {
+            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 150 / 2, 250, 150, 50, "Audio", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
+                StartTransition(MenuState.AudioSettings);
+            });
+
+            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 150 / 2, 320, 150, 50, "Modded", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
+                StartTransition(MenuState.ModdedSettings);
+            });
+
+            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 150 / 2, 500, 150, 50, "Back", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
+                StartTransition(MenuState.Main);
+            });
+        }
+
+        private void AudioSettings() {
             CustomElements.SliderFloat(GameLoop.SCREEN_WIDTH / 2 - 240 / 2, 200, 150, 25, "Master Volume", ref Settings.masterVolume, 0, 1, 20, textColor, font, menuButtonColor, menuButtonOverColor, 10, sideBlockColor, (value) => {
                 SoundManager.ChangeVolumeMaster(value);
             });
@@ -151,11 +222,27 @@ namespace Tetris {
             });
 
             CustomElements.SliderFloat(GameLoop.SCREEN_WIDTH / 2 - 240 / 2, 400, 150, 25, "SFX Volume", ref Settings.sfxVolume, 0, 1, 20, textColor, font, menuButtonColor, menuButtonOverColor, 10, sideBlockColor, (value) => {
-                SoundManager.ChangeSFXVolume(value);
+                SoundManager.ChangeVolumeSFX(value);
             });
 
             CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 150 / 2, 500, 150, 50, "Back", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
-                menuState = MenuState.Main;
+                StartTransition(MenuState.Settings);
+            });
+        }
+
+        private void ModdedSettings() {
+            CustomElements.SwitchButton(GameLoop.SCREEN_WIDTH / 2 - 250 / 2, 135, 250, 50, "Basic Tetromino", 15, trueColor, falseColor, overColor, textColor, font, ref Settings.normal, (value) => {
+                Settings.normal = value;
+                Settings.SaveSettings();
+            });
+
+            CustomElements.SwitchButton(GameLoop.SCREEN_WIDTH / 2 - 250 / 2, 205, 250, 50, "Gnowius Tetromino", 15, trueColor, falseColor, overColor, textColor, font, ref Settings.gnowius, (value) => {
+                Settings.gnowius = value;
+                Settings.SaveSettings();
+            });
+
+            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 150 / 2, 500, 150, 50, "Back", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
+                StartTransition(MenuState.Settings);
             });
         }
 
@@ -167,9 +254,8 @@ namespace Tetris {
             Raylib.DrawTextEx(font, "Chiptone", new Vector2(GameLoop.SCREEN_WIDTH / 2 - 70, 380), 20, 0, textColor);
 
             CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 150 / 2, 500, 150, 50, "Back", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
-                menuState = MenuState.Main;
+                StartTransition(MenuState.Main);
             });
         }
-
     }
 }
