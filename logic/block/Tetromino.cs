@@ -16,6 +16,7 @@ namespace Tetris
 
         private float fallSpeed = 1.0f;
         private float fastFallSpeed = 20f;
+
         private float fallDelta = 0.0f;
 
         private float moveDelta = 0.0f;
@@ -65,11 +66,6 @@ namespace Tetris
                 {
                     if (shape[i, j] == 1)
                     {
-                        if (shape.GetLength(0) == 2 && shape.GetLength(1) == 2)
-                        {
-                            DrawBlock(x + j, y + i + 1, color);
-                        }
-                        else
                         {
                             DrawBlock(x + j, y + i, color);
                         }
@@ -198,8 +194,11 @@ namespace Tetris
             {
                 y++;
             }
-            
+
             PlaceBlock();
+
+            gameScene.currentTetromino = gameScene.nextTetromino;
+            gameScene.nextTetromino = gameScene.GenerateRandomTetromino();
         }
 
         public void RotateTetromino()
@@ -237,26 +236,22 @@ namespace Tetris
             return this;
         }
 
-        public void MoveTo(int x, int y, int rotation)
+        public void MoveTo(int x, int y, int rotation, bool ultraSpeed)
         {
-            if (this.x < x)
-            {
-                MoveTetromino(1, 0);
-            }
-            else if (this.x > x)
-            {
-                MoveTetromino(-1, 0);
-            }
+            int deltaX = x - this.x;
+            int deltaY = y - this.y;
+
+            MoveTetromino(deltaX, 0);
 
             for (int i = 0; i < rotation; i++)
             {
                 RotateTetromino();
             }
 
-            if (this.x == x && this.y == y && this.rotation == rotation)
-            {
-                return;
-            }
+            SetFallSpeed(fastFallSpeed);
+            
+            if (ultraSpeed)
+                MoveTetromino(0, deltaY);
         }
 
         public Tetromino Clone()
@@ -286,9 +281,6 @@ namespace Tetris
             }
 
             Raylib.PlaySound(SoundManager.blockplace);
-
-            gameScene.currentTetromino = gameScene.nextTetromino;
-            gameScene.nextTetromino = gameScene.GenerateRandomTetromino();
         }
 
         public bool CheckCollision(int? newY = null)
