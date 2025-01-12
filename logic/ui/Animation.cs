@@ -1,5 +1,4 @@
 using Raylib_CsLo;
-using System;
 
 namespace Tetris {
     public class Animation {

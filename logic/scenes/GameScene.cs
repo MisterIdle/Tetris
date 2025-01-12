@@ -27,6 +27,7 @@ namespace Tetris
         private Color blinkColor = new Color(255, 0, 0, 255);
 
         private Color textColor = new Color(255, 255, 255, 255);
+        private Color textIAColor = new Color(255, 0, 0, 255);
 
         private Color menuButtonColor = new Color(75, 100, 125, 255);
         private Color menuButtonOverColor = new Color(65, 85, 110, 255);
@@ -118,9 +119,13 @@ namespace Tetris
             CheckLines();
             CheckGameOver();
 
-            if (Raylib.IsKeyPressed(KeyboardKey.KEY_P) && gameLoop.currentState == GameState.Playing)
+            if ((Raylib.IsKeyPressed(KeyboardKey.KEY_P) || Raylib.IsKeyPressed(KeyboardKey.KEY_ESCAPE)) && gameLoop.currentState == GameState.Playing)
             {
                 gameLoop.ChangeState(GameState.Paused);
+            } 
+            else if ((Raylib.IsKeyPressed(KeyboardKey.KEY_P) || Raylib.IsKeyPressed(KeyboardKey.KEY_ESCAPE)) && gameLoop.currentState == GameState.Paused)
+            {
+                gameLoop.ChangeState(GameState.Playing);
             }
 
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_F9))
@@ -136,13 +141,6 @@ namespace Tetris
 
         public override void DrawScene()
         {
-            if (gameLoop.currentState == GameState.Loading)
-            {
-                Raylib.ClearBackground(gameLoop.backgroundColor);
-                Raylib.DrawText("Loading...", GameLoop.SCREEN_WIDTH / 2 - 50, GameLoop.SCREEN_HEIGHT / 2 - 10, 20, textColor);
-                return;
-            }
-
             DrawGrid();
             DrawHUD();
 
@@ -189,14 +187,13 @@ namespace Tetris
             {
                 for (int j = 0; j < GRID_WIDTH; j++)
                 {
-                    Color cellColor = colorGrid[i, j];
+                    Raylib.DrawRectangle(MARGIN_X + j * CELL_SIZE, MARGIN_Y + i * CELL_SIZE, CELL_SIZE, CELL_SIZE, gridColor);
 
                     if (aiPlaying)
-                    {
-                        cellColor = iaPlayingUltraSpeed ? gridIAUltraSpeedColor : gridIAColor;
-                    }
-
-                    Raylib.DrawRectangle(MARGIN_X + j * CELL_SIZE, MARGIN_Y + i * CELL_SIZE, CELL_SIZE, CELL_SIZE, cellColor);
+                        Raylib.DrawRectangle(MARGIN_X + j * CELL_SIZE, MARGIN_Y + i * CELL_SIZE, CELL_SIZE, CELL_SIZE, gridIAColor);
+                    
+                    if (iaPlayingUltraSpeed)
+                        Raylib.DrawRectangle(MARGIN_X + j * CELL_SIZE, MARGIN_Y + i * CELL_SIZE, CELL_SIZE, CELL_SIZE, gridIAUltraSpeedColor);
                 }
             }
 
@@ -402,6 +399,7 @@ namespace Tetris
             DrawScoreHUD();
             DrawLevelHUD();
             DrawLinesHUD();
+            DrawIAMessageHUD();
         }
 
         private void DrawDegradedBackground(int x, int y, int width, int height, Color color)
@@ -436,6 +434,17 @@ namespace Tetris
         {
             Raylib.DrawTextEx(gameLoop.font, "LINES", new Vector2(GameLoop.SCREEN_WIDTH / 2 + 130, 270), 30, 0, textColor);
             Raylib.DrawTextEx(gameLoop.font, lines.ToString(), new Vector2(GameLoop.SCREEN_WIDTH / 2 + 130, 320), 30, 0, textColor);
+        }
+
+        private void DrawIAMessageHUD()
+        {
+            if (aiPlaying) {
+                Raylib.DrawTextEx(gameLoop.font, "AI ON", new Vector2(GameLoop.SCREEN_WIDTH / 2 + 130, 370), 20, 0, textIAColor);
+                if (iaPlayingUltraSpeed) {
+                    Raylib.DrawTextEx(gameLoop.font, "ULTRA SPEED (MAY BUG)", new Vector2(GameLoop.SCREEN_WIDTH / 2 + 110, 400), 10, 0, textIAColor);
+                }
+            }
+
         }
 
         private void DrawPause()

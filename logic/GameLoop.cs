@@ -17,6 +17,8 @@ namespace Tetris
 
             Raylib.InitAudioDevice();
 
+            Raylib.SetExitKey(-1);
+
             font = Raylib.LoadFont("font/Font.ttf");
 
             SoundManager.LoadSound();
@@ -68,6 +70,14 @@ namespace Tetris
             }
 
             Raylib.CloseAudioDevice();
+            Raylib.CloseWindow();
+        }
+
+        public void Quit()
+        {
+            Raylib.EndDrawing();
+            Raylib.CloseAudioDevice();
+            Raylib.UnloadFont(font);
             Raylib.CloseWindow();
         }
     }

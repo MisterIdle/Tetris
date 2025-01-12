@@ -14,6 +14,9 @@ namespace Tetris {
         private Color menuButtonColor = new Color(75, 100, 125, 255);
         private Color menuButtonOverColor = new Color(65, 85, 110, 255);
 
+        private Color howToPlayButtonColor = new Color(75, 125, 75, 255);
+        private Color howToPlayButtonOverColor = new Color(65, 110, 65, 255);
+
         private Color quitButtonColor = new Color(125, 75, 75, 255);
         private Color quitButtonOverColor = new Color(110, 65, 65, 255);
 
@@ -39,6 +42,7 @@ namespace Tetris {
             Settings,
             AudioSettings,
             ModdedSettings,
+            HowToPlay,
             Credits,
             Play,
         }
@@ -77,11 +81,15 @@ namespace Tetris {
                     break;
 
                 case MenuState.AudioSettings:
-                    AudioSettings();
+                    DrawAudioSettings();
                     break;
 
                 case MenuState.ModdedSettings:
-                    ModdedSettings();
+                    DrawModdedSettings();
+                    break;
+
+                case MenuState.HowToPlay:
+                    DrawHowToPlaySettings();
                     break;
 
                 case MenuState.Credits:
@@ -140,24 +148,28 @@ namespace Tetris {
         }
 
         private void DrawMain() {
-            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 190 / 2, 130, 200, 50, "Play", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
+            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 250 / 2, 165, 250, 50, "Play", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
                 StartTransition(MenuState.Play);
             });
 
-            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 190 / 2, 200, 200, 50, "Continue", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
+            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 250 / 2, 235, 250, 50, "Continue", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
                 Animation.FadeOut(1);
                 gameLoop.ChangeState(GameState.Continue);
             });
 
-            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 190 / 2, 270, 200, 50, "Settings", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
+            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 250 / 2, 305, 250, 50, "How to play", 20, howToPlayButtonColor, howToPlayButtonOverColor, textColor, font, () => {
+                StartTransition(MenuState.HowToPlay);
+            });
+
+            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 250 / 2, 375, 250, 50, "Settings", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
                 StartTransition(MenuState.Settings);
             });
 
-            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 190 / 2, 340, 200, 50, "Credits", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
+            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 250 / 2, 445, 250, 50, "Credits", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
                 StartTransition(MenuState.Credits);
             });
 
-            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 190 / 2, 500, 200, 50, "Quit", 20, quitButtonColor, quitButtonOverColor, textColor, font, () => {
+            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 250 / 2, 530, 250, 50, "Quit", 20, quitButtonColor, quitButtonOverColor, textColor, font, () => {
                 Raylib.CloseWindow();
             });
         }
@@ -217,7 +229,7 @@ namespace Tetris {
             });
         }
 
-        private void AudioSettings() {
+        private void DrawAudioSettings() {
             CustomElements.SliderFloat(GameLoop.SCREEN_WIDTH / 2 - 240 / 2, 200, 150, 25, "Master Volume", ref Settings.masterVolume, 0, 1, 20, textColor, font, menuButtonColor, menuButtonOverColor, 10, sideBlockColor, (value) => {
                 SoundManager.ChangeVolumeMaster(value);
             });
@@ -235,7 +247,7 @@ namespace Tetris {
             });
         }
 
-        private void ModdedSettings() {
+        private void DrawModdedSettings() {
             CustomElements.SwitchButton(GameLoop.SCREEN_WIDTH / 2 - 250 / 2, 135, 250, 50, "Basic Tetromino", 15, trueColor, falseColor, overColor, textColor, font, ref Settings.normal, (value) => {
                 Settings.normal = value;
                 Settings.SaveSettings();
@@ -251,12 +263,36 @@ namespace Tetris {
             });
         }
 
+        private void DrawHowToPlaySettings() {
+            Raylib.DrawTextEx(font, "Rotate", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "Rotate", 20, 0).X / 2, 155), 20, 0, textColor);
+            Raylib.DrawTextEx(font, "< UP Arrow >", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "< UP Arrow >", 14, 0).X / 2, 185), 14, 0, textColor);
+
+            Raylib.DrawTextEx(font, "Move", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "Move", 20, 0).X / 2, 215), 20, 0, textColor);
+            Raylib.DrawTextEx(font, "< LEFT/RIGHT Arrow >", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "< LEFT/RIGHT Arrow >", 14, 0).X / 2, 245), 14, 0, textColor);
+
+            Raylib.DrawTextEx(font, "Soft Drop", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "Soft Drop", 20, 0).X / 2, 275), 20, 0, textColor);
+            Raylib.DrawTextEx(font, "< DOWN Arrow >", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "< DOWN Arrow >", 14, 0).X / 2, 305), 14, 0, textColor);
+
+            Raylib.DrawTextEx(font, "Hard Drop", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "Hard Drop", 20, 0).X / 2, 335), 20, 0, textColor);
+            Raylib.DrawTextEx(font, "< SPACE >", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "< SPACE >", 14, 0).X / 2, 365), 14, 0, textColor);
+
+            Raylib.DrawTextEx(font, "Pause", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "Pause", 20, 0).X / 2, 395), 20, 0, textColor);
+            Raylib.DrawTextEx(font, "< P / ESC >", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "< P / ESC >", 14, 0).X / 2, 425), 14, 0, textColor);
+
+            Raylib.DrawTextEx(font, "Bot", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "Bot", 20, 0).X / 2, 455), 20, 0, textColor);
+            Raylib.DrawTextEx(font, "< F9 / F10 >", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "< F9 / F10 >", 14, 0).X / 2, 485), 14, 0, textColor);
+            
+            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 150 / 2, 515, 150, 50, "Back", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
+                StartTransition(MenuState.Main);
+            });
+        }
+
         private void DrawCredits() {
-            Raylib.DrawTextEx(font, "Technologies", new Vector2(GameLoop.SCREEN_WIDTH / 2 - 110, 200), 20, 0, textColor);
-            Raylib.DrawTextEx(font, "Raylib", new Vector2(GameLoop.SCREEN_WIDTH / 2 - 50, 260), 20, 0, textColor);
-            Raylib.DrawTextEx(font, "Raylib-CsLo", new Vector2(GameLoop.SCREEN_WIDTH / 2 - 100, 300), 20, 0, textColor);
-            Raylib.DrawTextEx(font, "Newtonsoft.Json", new Vector2(GameLoop.SCREEN_WIDTH / 2 - 140, 340), 20, 0, textColor);
-            Raylib.DrawTextEx(font, "Chiptone", new Vector2(GameLoop.SCREEN_WIDTH / 2 - 70, 380), 20, 0, textColor);
+            Raylib.DrawTextEx(font, "Technologies", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "Technologies", 20, 0).X / 2, 200), 20, 0, textColor);
+            Raylib.DrawTextEx(font, "Raylib", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "Raylib", 20, 0).X / 2, 260), 20, 0, textColor);
+            Raylib.DrawTextEx(font, "Raylib-CsLo", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "Raylib-CsLo", 20, 0).X / 2, 300), 20, 0, textColor);
+            Raylib.DrawTextEx(font, "Newtonsoft.Json", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "Newtonsoft.Json", 20, 0).X / 2, 340), 20, 0, textColor);
+            Raylib.DrawTextEx(font, "Chiptone", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "Chiptone", 20, 0).X / 2, 380), 20, 0, textColor);
 
             CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 150 / 2, 500, 150, 50, "Back", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
                 StartTransition(MenuState.Main);

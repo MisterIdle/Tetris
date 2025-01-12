@@ -5,9 +5,9 @@
   "randomMovement": false,
   "level": 1,
   "normal": true,
-  "gnowius": false,
+  "gnowius": true,
   "custom": false,
-  "masterVolume": 0.36666667,
-  "musicVolume": 0.6333333,
-  "sfxVolume": 1.0
+  "masterVolume": 0.0,
+  "musicVolume": 0.006666667,
+  "sfxVolume": 0.0
 }

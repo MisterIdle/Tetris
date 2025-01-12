@@ -15,7 +15,8 @@ namespace Tetris
         public int rotation = 0;
 
         private float fallSpeed = 1.0f;
-        private float fastFallSpeed = 20f;
+        private float normalFallSpeed = 1.0f;
+        private float fastFallSpeed = 10.0f;
 
         private float fallDelta = 0.0f;
 
@@ -236,6 +237,11 @@ namespace Tetris
             return this;
         }
 
+        public Tetromino Clone()
+        {
+            return new Tetromino(gameScene, x, y, shape, color);
+        }
+
         public void MoveTo(int x, int y, int rotation, bool ultraSpeed)
         {
             int deltaX = x - this.x;
@@ -252,11 +258,6 @@ namespace Tetris
             
             if (ultraSpeed)
                 MoveTetromino(0, deltaY);
-        }
-
-        public Tetromino Clone()
-        {
-            return new Tetromino(gameScene, x, y, shape, color);
         }
 
 
@@ -330,8 +331,8 @@ namespace Tetris
 
         private void SetFallSpeed(float fallSpeed)
         {
-            this.fallSpeed = fallSpeed * gameScene.level;
-        } 
+            this.fallSpeed = fallSpeed * gameScene.level / 1.2f;
+        }
 
         public void HandleInput()
         {
@@ -344,12 +345,10 @@ namespace Tetris
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_RIGHT))
                 MoveTetromino(1, 0);
 
-            if (Raylib.IsKeyDown(KeyboardKey.KEY_DOWN)) {
+            if (Raylib.IsKeyDown(KeyboardKey.KEY_DOWN))
                 SetFallSpeed(fastFallSpeed);
-            }
-            else {
-                SetFallSpeed(1.0f);
-            }
+            else
+                SetFallSpeed(normalFallSpeed);
 
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE))
                 PlaceTetrominoAsBottom();
