@@ -1,4 +1,7 @@
 using Raylib_CsLo;
+using Tetris.Scene;
+using Tetris.Audio;
+using Tetris.Options;
 
 namespace Tetris
 {
@@ -11,13 +14,13 @@ namespace Tetris
         public Image icon;
         public GameState currentState;
 
+        // Initialize the game
         private void Init()
         {
             Raylib.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Tetris - By MisterIdle");
             Raylib.SetTargetFPS(60);
 
             Raylib.InitAudioDevice();
-
             Raylib.SetExitKey(-1);
 
             font = Raylib.LoadFont("font/Font.ttf");
@@ -32,6 +35,7 @@ namespace Tetris
             SceneManager.SetScene(new GameMenu(this));
         }
 
+        // Switch scenes based on the current game state
         private void SwitchSceneGameStates()
         {
             switch (currentState)
@@ -48,6 +52,7 @@ namespace Tetris
             }
         }
 
+        // Change the current game state and switch scenes if necessary
         public void ChangeState(GameState newState)
         {
             if (currentState != newState)
@@ -57,6 +62,7 @@ namespace Tetris
             }
         }
 
+        // Main game loop
         public void Run()
         {
             Init();
@@ -64,7 +70,6 @@ namespace Tetris
             while (!Raylib.WindowShouldClose())
             {
                 Raylib.BeginDrawing();
-
                 Raylib.ClearBackground(backgroundColor);
 
                 SceneManager.UpdateScene();

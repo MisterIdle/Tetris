@@ -1,9 +1,10 @@
 using Raylib_CsLo;
 using System.Collections.Generic;
 
-namespace Tetris
-{
+using Tetris.Options;
 
+namespace Tetris.Audio
+{
     public class SoundManager
     {
         public static Sound backgroundMusicGame;
@@ -16,6 +17,7 @@ namespace Tetris
         public static List<Sound> music = new List<Sound>();
         public static List<Sound> sfx = new List<Sound>();
 
+        // Load all sound files
         public static void LoadSound()
         {
             blockplace = Raylib.LoadSound("audio/blockplace.wav");
@@ -33,9 +35,9 @@ namespace Tetris
             sfx.Add(lineclear);
             sfx.Add(levelup);
             sfx.Add(lose);
-
         }
 
+        // Loop a specific audio if it's not already playing
         public static void LoopAudio(Sound sound)
         {
             if (!Raylib.IsSoundPlaying(sound))
@@ -44,6 +46,7 @@ namespace Tetris
             }
         }
 
+        // Stop all audio
         public static void StopAllAudio()
         {
             foreach (Sound sound in music)
@@ -57,12 +60,14 @@ namespace Tetris
             }
         }
 
+        // Change the master volume and save settings
         public static void ChangeVolumeMaster(float masterVolume)
         {
             Raylib.SetMasterVolume(masterVolume);
             Settings.SaveSettings();
         }
 
+        // Change the volume of music and save settings
         public static void ChangeVolumeMusic(float musicVolume)
         {
             foreach (Sound sound in music)
@@ -73,6 +78,7 @@ namespace Tetris
             Settings.SaveSettings();
         }       
 
+        // Change the volume of sound effects and save settings
         public static void ChangeVolumeSFX(float sfxVolume)
         {
             foreach (Sound sound in sfx)
@@ -82,6 +88,5 @@ namespace Tetris
 
             Settings.SaveSettings();
         }
-
     }
 }

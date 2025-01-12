@@ -3,12 +3,18 @@ using Raylib_CsLo;
 using System.IO;
 using System;
 
-namespace Tetris {
+using Tetris.Block;
+using Tetris.Audio;
+using Tetris.Options;
+using Tetris.UI;
+
+namespace Tetris.Scene {
     public class GameMenu : Scene {
         private GameLoop gameLoop;
         private GameScene gameScene;
         private Font font;
 
+        // Color definitions for various elements in the menu
         private Color gridColor = new Color(35, 53, 89, 255);
         private Color borderColor = new Color(25, 43, 79, 255);
 
@@ -31,13 +37,14 @@ namespace Tetris {
         private Color sideBlockColor = new Color(15, 25, 45, 255);
 
         private float animationOffset = 0;
-        private float animationSpeed = 0.002f;
+        private float animationSpeed = 0.002f;  // Speed for the title animation
 
-        private MenuState menuState = MenuState.Main;
-        private MenuState nextMenuState = MenuState.Main;
-        private float transitionAlpha = 0;
-        private bool isTransitioning = false;
+        private MenuState menuState = MenuState.Main;  // Current state of the menu
+        private MenuState nextMenuState = MenuState.Main;  // Next state after transition
+        private float transitionAlpha = 0;  // Transition effect opacity
+        private bool isTransitioning = false;  // Flag for menu transition
 
+        // Enum for different menu states
         enum MenuState {
             Main,
             Settings,
@@ -47,10 +54,12 @@ namespace Tetris {
             Play,
         }
 
+        // Constructor for the GameMenu class
         public GameMenu(GameLoop gameLoop) {
             this.gameLoop = gameLoop;
         }
 
+        // Load the scene, initialize the font and stop all audio
         public override void LoadScene() {
             font = Raylib.LoadFont("font/Font.ttf");
 
@@ -59,14 +68,17 @@ namespace Tetris {
             gameScene = new GameScene(gameLoop);
         }
 
+        // Update the scene by checking transitions and looping background music
         public override void UpdateScene() {
             UpdateTransition();
             SoundManager.LoopAudio(SoundManager.backgroundMusicMenu);
         }
 
+        // Draw the scene, depending on the menu state
         public override void DrawScene() {
             DrawMenu();
 
+            // Draw specific screen content based on the menu state
             switch (menuState) {
                 case MenuState.Main:
                     DrawMain();
@@ -93,16 +105,19 @@ namespace Tetris {
                     break;
             }
 
+            // Draw transition effect if transitioning between states
             if (isTransitioning) {
                 Raylib.DrawRectangle(GameLoop.SCREEN_WIDTH / 3 - 35, 120, GameLoop.SCREEN_WIDTH / 2 - 35, GameLoop.SCREEN_HEIGHT, new Color(gridColor.r, gridColor.g, gridColor.b, (byte)(transitionAlpha * 255)));
             }
         }
 
+        // Start the transition effect to a new menu state
         private void StartTransition(MenuState newState) {
             isTransitioning = true;
             nextMenuState = newState;
         }
 
+        // Update the transition effect opacity during scene change
         private void UpdateTransition() {
             if (isTransitioning) 
             {
@@ -124,6 +139,7 @@ namespace Tetris {
             }
         }
 
+        // Draw the main menu layout with title and borders
         private void DrawMenu() {
             animationOffset += animationSpeed;
            
@@ -134,6 +150,7 @@ namespace Tetris {
             Raylib.DrawTextEx(font, "Ver 1.0", new Vector2(GameLoop.SCREEN_WIDTH / 2 - 100 / 2, 30 + (float)Math.Sin(animationOffset * Math.PI * 2) * 5), 15, 0, textColor);
             Raylib.DrawTextEx(font, "by MisterIdle / Alexy", new Vector2(GameLoop.SCREEN_WIDTH / 2 - 120, 100 + (float)Math.Sin(animationOffset * Math.PI * 2) * 5), 12, 0, textColor);
 
+            // Draw borders for the game screen
             for (int i = 0; i < 20; i++) {
                 Tetromino rightBorder = new Tetromino(gameScene, 50, 0, new int[1, 1], borderColor);
                 rightBorder.DrawBlock(2, i, borderColor);
@@ -143,6 +160,7 @@ namespace Tetris {
             }
         }
 
+        // Draw the main menu buttons
         private void DrawMain() {
             CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 250 / 2, 165, 250, 50, "Play", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
                 StartTransition(MenuState.Play);
@@ -174,6 +192,7 @@ namespace Tetris {
             });
         }
 
+        // Draw the play settings page
         private void DrawPlay() {
             CustomElements.SwitchButton(GameLoop.SCREEN_WIDTH / 2 - 250 / 2, 135, 250, 50, "Shadow", 17, trueColor, falseColor, overColor, textColor, font, ref Settings.shadow, (value) => {
                 Settings.shadow = value;
@@ -215,6 +234,7 @@ namespace Tetris {
             });
         }
 
+        // Draw the settings page with audio and challenge settings
         private void DrawSettings() {
             Raylib.DrawTextEx(font, "Settings", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "Settings", 20, 0).X / 2, 170), 20, 0, textColor);
 
@@ -239,6 +259,7 @@ namespace Tetris {
             });
         }
 
+        // Draw the audio settings page with volume sliders
         private void DrawAudioSettings() {
             CustomElements.SliderFloat(GameLoop.SCREEN_WIDTH / 2 - 240 / 2, 200, 150, 25, "Master Volume", ref Settings.masterVolume, 0, 1, 20, textColor, font, menuButtonColor, menuButtonOverColor, 10, sideBlockColor, (value) => {
                 SoundManager.ChangeVolumeMaster(value);
@@ -257,6 +278,7 @@ namespace Tetris {
             });
         }
 
+        // Draw the how to play settings page with control instructions
         private void DrawHowToPlaySettings() {
             Raylib.DrawTextEx(font, "Rotate", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "Rotate", 20, 0).X / 2, 155), 20, 0, textColor);
             Raylib.DrawTextEx(font, "< UP Arrow >", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "< UP Arrow >", 14, 0).X / 2, 185), 14, 0, textColor);
@@ -281,6 +303,7 @@ namespace Tetris {
             });
         }
 
+        // Draw the credits page with technology information
         private void DrawCredits() {
             Raylib.DrawTextEx(font, "Technologies", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "Technologies", 20, 0).X / 2, 200), 20, 0, textColor);
             Raylib.DrawTextEx(font, "Raylib", new Vector2(GameLoop.SCREEN_WIDTH / 2 - Raylib.MeasureTextEx(font, "Raylib", 20, 0).X / 2, 260), 17, 0, textColor);

@@ -1,3 +1,7 @@
+namespace Tetris.Scene
+{
+
+    // Enum for game states
     public enum GameState
     {
         Menu,
@@ -7,3 +11,4 @@
         Paused,
         GameOver,
     }
+}

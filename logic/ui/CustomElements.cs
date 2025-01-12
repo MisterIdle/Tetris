@@ -1,11 +1,14 @@
+// RAYGUI altenative made by MisterIdle
+
 using System;
 using System.Numerics;
 using Raylib_CsLo;
 
-namespace Tetris
+namespace Tetris.UI
 {
     public class CustomElements
     {
+        // Draws a button and handles click events
         public static void Button(int x, int y, int width, int height, string text, int size, Color color, Color overColor, Color textColor, Font font, Action onClick)
         {
             bool isHovered = Raylib.CheckCollisionPointRec(Raylib.GetMousePosition(), new Rectangle(x, y, width, height));
@@ -26,6 +29,7 @@ namespace Tetris
             Raylib.DrawTextEx(font, text, new Vector2(x + width / 2 - textSize.X / 2, y + height / 2 - textSize.Y / 2), size, 0, textColor);
         }
 
+        // Draws a float slider and handles value changes
         public static void SliderFloat(int x, int y, int width, int height, string labelText, ref float value, float minValue, float maxValue, int size, Color textColor, Font font, Color sliderColor, Color handleColor, int handleRadius, Color backgroundColor, Action<float> onValueChanged)
         {
             Vector2 labelSize = Raylib.MeasureTextEx(font, labelText, size, 0);
@@ -47,17 +51,18 @@ namespace Tetris
 
             if (Raylib.CheckCollisionPointRec(Raylib.GetMousePosition(), new Rectangle(x, y, width, height)) && Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_LEFT))
             {
-            float newValue = (Raylib.GetMouseX() - x) / (float)width * (maxValue - minValue) + minValue;
-            newValue = Math.Clamp(newValue, minValue, maxValue);
-            
-            if (newValue != value)
-            {
-                value = newValue;
-                onValueChanged(value);
-            }
+                float newValue = (Raylib.GetMouseX() - x) / (float)width * (maxValue - minValue) + minValue;
+                newValue = Math.Clamp(newValue, minValue, maxValue);
+
+                if (newValue != value)
+                {
+                    value = newValue;
+                    onValueChanged(value);
+                }
             }
         }
 
+        // Draws an integer slider and handles value changes
         public static void SliderInt(int x, int y, int width, int height, string labelText, ref int value, int minValue, int maxValue, int size, Color textColor, Font font, Color sliderColor, Color handleColor, int handleRadius, Color backgroundColor, Action<int> onValueChanged)
         {
             Vector2 labelSize = Raylib.MeasureTextEx(font, labelText, size, 0);
@@ -90,6 +95,7 @@ namespace Tetris
             }
         }
 
+        // Draws a switch button and handles toggle events
         public static void SwitchButton(int x, int y, int width, int height, string text, int size, Color onColor, Color offColor, Color overColor, Color textColor, Font font, ref bool value, Action<bool> onValueChanged)
         {
             bool isHovered = Raylib.CheckCollisionPointRec(Raylib.GetMousePosition(), new Rectangle(x, y, width, height));

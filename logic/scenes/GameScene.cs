@@ -3,10 +3,21 @@ using System.Collections.Generic;
 using System.Numerics;
 using Raylib_CsLo;
 
-namespace Tetris
+// Try Spectump or another game in my itch.io page: https://misteridle.itch.io/ ;)
+
+using Tetris.Block;
+using Tetris.UI;
+using Tetris.Audio;
+using Tetris.Options;
+
+namespace Tetris.Scene
 {
     public class GameScene : Scene
     {
+        private GameLoop gameLoop;
+        private Bot bot;
+
+        // Grid dimensions
         public const int GRID_WIDTH = 10;
         public const int GRID_HEIGHT = 20;
         public const int CELL_SIZE = 30;
@@ -14,12 +25,15 @@ namespace Tetris
         public int MARGIN_X;
         public int MARGIN_Y;
 
+        // Grid and color grid
         public int[,] grid = new int[GRID_HEIGHT, GRID_WIDTH];
         public Color[,] colorGrid = new Color[GRID_HEIGHT, GRID_WIDTH];
 
+        // Current and next Tetromino
         public Tetromino currentTetromino;
         public Tetromino nextTetromino;
 
+        // Color definitions for various elements in the game
         private Color gridColor = new Color(35, 53, 89, 255);
         private Color gridIAColor = new Color(89, 35, 35, 255);
         private Color gridIAUltraSpeedColor = new Color(139, 0, 0, 255);
@@ -35,17 +49,23 @@ namespace Tetris
         private Color quitButtonColor = new Color(125, 75, 75, 255);
         private Color quitButtonOverColor = new Color(110, 65, 65, 255);
 
+        // Game score, level, and lines cleared
         public int score = 0;
         private int scoreMultiplier = 1;
-
         public int level = 1;
         public int lines = 0;
 
+        public bool shadow = true;
+        public bool placedBlocks = true;
+        public bool nextBlock = true;
+        public bool randomMovement = false;
+
+        public bool normal = true;
+        public bool gnowius = false;
+
+        // Boolean flags for AI playing
         public bool aiPlaying = false;
         public bool iaPlayingUltraSpeed = false;
-
-        private GameLoop gameLoop;
-        private Bot bot;
 
         public GameScene(GameLoop gameLoop)
         {
@@ -54,6 +74,8 @@ namespace Tetris
             MARGIN_X = GameLoop.SCREEN_WIDTH / 3 + 20 - GRID_WIDTH * CELL_SIZE / 2;
             MARGIN_Y = 0;
         }
+
+        // Load the game scene
 
         public override void LoadScene()
         {
@@ -67,35 +89,52 @@ namespace Tetris
 
                 score = saveData.score;
                 level = saveData.level;
-                lines = saveData.linesCleared;
+                lines = saveData.lines;
+
+                shadow = saveData.shadow;
+                placedBlocks = saveData.placedBlocks;
+                nextBlock = saveData.nextBlock;
+                randomMovement = saveData.randomMovement;
+
+                normal = saveData.normal;
+                gnowius = saveData.gnowius;
 
                 grid = saveData.grid;
                 colorGrid = saveData.colorGrid;
 
                 currentTetromino = GenerateSavedTetromino(new TetrominoData
                 {
-                    Shape = saveData.currentBlock.shape,
-                    Color = new int[] { saveData.currentBlock.color.r, saveData.currentBlock.color.g, saveData.currentBlock.color.b, saveData.currentBlock.color.a }
+                    Shape = saveData.currentTetromino.shape,
+                    Color = new int[] { saveData.currentTetromino.color.r, saveData.currentTetromino.color.g, saveData.currentTetromino.color.b, saveData.currentTetromino.color.a }
                 });
                 
                 nextTetromino = GenerateSavedTetromino(new TetrominoData
                 {
-                    Shape = saveData.nextBlock.shape,
-                    Color = new int[] { saveData.nextBlock.color.r, saveData.nextBlock.color.g, saveData.nextBlock.color.b, saveData.nextBlock.color.a }
-                });
+                    Shape = saveData.currentTetromino.shape,
+                    Color = new int[] { saveData.currentTetromino.color.r, saveData.currentTetromino.color.g, saveData.currentTetromino.color.b, saveData.currentTetromino.color.a }
+                });;
             }
             
             else if (gameLoop.currentState == GameState.Loading)
             {
                 currentTetromino = GenerateRandomTetromino();
                 nextTetromino = GenerateRandomTetromino();
-    
+
+                shadow = Settings.shadow;
+                placedBlocks = Settings.placedBlocks;
+                nextBlock = Settings.nextBlock;
+                randomMovement = Settings.randomMovement;
+
+                normal = Settings.normal;
+                gnowius = Settings.gnowius;
+
                 level = Settings.level;
             }
 
             gameLoop.ChangeState(GameState.Playing);
         }
 
+        // Update the game scene
         public override void UpdateScene()
         {    
             if (gameLoop.currentState == GameState.Playing)
@@ -131,6 +170,7 @@ namespace Tetris
             }
         }
 
+        // Draw the game scene
         public override void DrawScene()
         {
             DrawGrid();
@@ -148,17 +188,19 @@ namespace Tetris
                 return;
             }
 
-            if (Settings.shadow)
+            if (shadow)
                 currentTetromino.DrawShadowTetromino();
 
-            if (Settings.placedBlocks)
+            if (placedBlocks)
                 currentTetromino.DrawPlacedTetromino();
 
-            if (Settings.randomMovement)
+            if (randomMovement)
                 currentTetromino.MoveTetrominoRandomly();
 
             currentTetromino.DrawTetromino();
         }
+
+        // Initialize the grid
 
         private void InitializeGrid()
         {
@@ -172,7 +214,7 @@ namespace Tetris
             }
         }
 
-
+        // Draw the grid and borders
         private void DrawGrid()
         {
             for (int i = 0; i < GRID_HEIGHT; i++)
@@ -199,6 +241,8 @@ namespace Tetris
             }
         }
 
+        // Blink a line when it is cleared
+
         public void BlinkLine(int lineIndex, int blinkCount, float blinkDuration)
         {
             for (int blink = 0; blink < blinkCount; blink++)
@@ -212,6 +256,7 @@ namespace Tetris
 
                 Raylib.PlaySound(SoundManager.lineclear);
 
+                // Draw the scene twice to make the blink effect more noticeable
                 Raylib.EndDrawing();
                 Raylib.BeginDrawing();
                 Raylib.ClearBackground(gameLoop.backgroundColor);
@@ -219,6 +264,7 @@ namespace Tetris
             }
         }
 
+        // Check for completed lines and clear them
         public void CheckLines()
         {
             int linesCleared = 0;
@@ -261,6 +307,7 @@ namespace Tetris
             }
         }
 
+        // Remove a line from the grid
         private void RemoveLine(int lineIndex)
         {
             for (int j = 0; j < GRID_WIDTH; j++)
@@ -269,6 +316,8 @@ namespace Tetris
                 colorGrid[lineIndex, j] = gridColor;
             }
         }
+
+        // Move lines down after clearing a line
 
         private void MoveLinesDown(int lineIndex)
         {
@@ -281,6 +330,8 @@ namespace Tetris
                 }
             }
         }
+
+        // Check if the game is over
 
         private void CheckGameOver()
         {
@@ -295,20 +346,23 @@ namespace Tetris
             }
         }
 
+        // Generate a random Tetromino
+
         public Tetromino GenerateRandomTetromino()
         {
             var random = new Random();
             List<Tetromino> combinedBlocks = new List<Tetromino>();
 
+            // Load normal and Gnowius blocks from JSON files
             string pathNormal = "json/block/blocks.json";
             string pathGnowius = "json/block/gnowius.json";
 
-            if (Settings.normal)
+            if (normal)
             {
                 combinedBlocks.AddRange(JsonLoader.LoadFromJson(pathNormal));
             }
 
-            if (Settings.gnowius)
+            if (gnowius)
             {
                 combinedBlocks.AddRange(JsonLoader.LoadFromJson(pathGnowius));
             }
@@ -319,12 +373,14 @@ namespace Tetris
             return new Tetromino(this, GRID_WIDTH / 2 - randomBlock.shape.GetLength(1) / 2, 0, randomBlock.shape, randomBlock.color);
         }
 
+        // Generate a saved Tetromino
+
         public Tetromino GenerateSavedTetromino(TetrominoData tetrominoData)
         {
             return new Tetromino(this, GRID_WIDTH / 2 - tetrominoData.Shape.GetLength(1) / 2, 0, tetrominoData.Shape, new Color(tetrominoData.Color[0], tetrominoData.Color[1], tetrominoData.Color[2], tetrominoData.Color[3]));
         }
 
-
+        // Score points based on the number of lines cleared
         private void ScorePoints(int lines)
         {
             switch (lines)
@@ -347,24 +403,25 @@ namespace Tetris
             }
         }
 
+        // Score multiplier based on game settings
         private void ScoreMultiplier()
         {
-            if (!Settings.nextBlock)
+            if (!nextBlock)
             {
                 scoreMultiplier *= 2;
             }
 
-            if (!Settings.shadow)
+            if (!shadow)
             {
                 scoreMultiplier *= 2;
             }
 
-            if (!Settings.placedBlocks)
+            if (!placedBlocks)
             {
                 scoreMultiplier *= 5;
             }
 
-            if (Settings.randomMovement)
+            if (randomMovement)
             {
                 scoreMultiplier *= 3;
             }
@@ -372,6 +429,7 @@ namespace Tetris
             Console.WriteLine("Score Multiplier: " + scoreMultiplier);
         }
 
+        // Draw the HUD
         private void DrawHUD()
         {
             DrawDegradedBackground(GameLoop.SCREEN_WIDTH / 2 + 100, 0, GameLoop.SCREEN_WIDTH / 2 - 100, GameLoop.SCREEN_HEIGHT, gridColor);
@@ -382,14 +440,16 @@ namespace Tetris
             DrawIAMessageHUD();
         }
 
+        // Draw a degraded background
         private void DrawDegradedBackground(int x, int y, int width, int height, Color color)
         {
             Raylib.DrawRectangleGradientV(x, y, width, height, Raylib.ColorAlpha(color, 0.5f), Raylib.ColorAlpha(color, 0.2f));
         }
 
+        // Draw the next Tetromino in the HUD
         private void DrawNextTetrominoHUD()
         {
-            if (Settings.nextBlock)
+            if (nextBlock)
             {
                 Raylib.DrawTextEx(gameLoop.font, "NEXT", new Vector2(GameLoop.SCREEN_WIDTH / 2 + 130, 440), 40, 0, textColor);
 
@@ -397,6 +457,7 @@ namespace Tetris
             }
         }
 
+        // Draw the score in the HUD
         private void DrawScoreHUD()
         {
             Raylib.DrawTextEx(gameLoop.font, "SCORE", new Vector2(GameLoop.SCREEN_WIDTH / 2 + 130, 30), 30, 0, textColor);
@@ -404,18 +465,21 @@ namespace Tetris
             Raylib.DrawTextEx(gameLoop.font, scoreText, new Vector2(GameLoop.SCREEN_WIDTH / 2 + 130, 80), 30, 0, textColor);
         }
 
+        // Draw the level in the HUD
         private void DrawLevelHUD()
         {
             Raylib.DrawTextEx(gameLoop.font, "LEVEL", new Vector2(GameLoop.SCREEN_WIDTH / 2 + 130, 150), 30, 0, textColor);
             Raylib.DrawTextEx(gameLoop.font, level.ToString(), new Vector2(GameLoop.SCREEN_WIDTH / 2 + 130, 200), 30, 0, textColor);
         }
 
+        // Draw the lines cleared in the HUD
         private void DrawLinesHUD()
         {
             Raylib.DrawTextEx(gameLoop.font, "LINES", new Vector2(GameLoop.SCREEN_WIDTH / 2 + 130, 270), 30, 0, textColor);
             Raylib.DrawTextEx(gameLoop.font, lines.ToString(), new Vector2(GameLoop.SCREEN_WIDTH / 2 + 130, 320), 30, 0, textColor);
         }
 
+        // Draw the AI message in the HUD
         private void DrawIAMessageHUD()
         {
             if (aiPlaying) {
@@ -427,6 +491,7 @@ namespace Tetris
 
         }
 
+        // Draw the pause screen
         private void DrawPause()
         {
             Raylib.DrawRectangle(0, 0, GameLoop.SCREEN_WIDTH, GameLoop.SCREEN_HEIGHT, Raylib.ColorAlpha(Raylib.BLACK, 0.5f));
@@ -464,6 +529,7 @@ namespace Tetris
             });
         }
 
+        // Draw the game over screen
         private void DrawGameOver()
         {
             Raylib.DrawRectangle(0, 0, GameLoop.SCREEN_WIDTH, GameLoop.SCREEN_HEIGHT, Raylib.ColorAlpha(Raylib.BLACK, 0.5f));

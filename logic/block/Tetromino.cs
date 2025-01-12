@@ -1,6 +1,9 @@
 using Raylib_CsLo;
 
-namespace Tetris
+using Tetris.Scene;
+using Tetris.Audio;
+
+namespace Tetris.Block
 {
     public class Tetromino
     {
@@ -23,6 +26,7 @@ namespace Tetris
 
         private GameScene gameScene;
 
+        // Basic constructor for a Tetromino
         public Tetromino(GameScene gameScene, int x, int y, int[,] shape, Color color)
         {
             this.gameScene = gameScene;
@@ -31,7 +35,8 @@ namespace Tetris
             this.shape = shape;
             this.color = color;
         }
-
+        
+        // Draws a single block of the Tetromino
         public void DrawBlock(int x, int y, Color color)
         {
             int drawX = gameScene.MARGIN_X + x * GameScene.CELL_SIZE;
@@ -44,11 +49,13 @@ namespace Tetris
             DrawBlockLighting(drawX, drawY);
         }
 
+        // Draws the outline of a block
         private void DrawBlockOutline(int drawX, int drawY)
         {
             Raylib.DrawRectangleLinesEx(new Rectangle(drawX, drawY, GameScene.CELL_SIZE, GameScene.CELL_SIZE), 3, Raylib.BLACK);
         }
 
+        // Draws the lighting effect on a block
         private void DrawBlockLighting(int drawX, int drawY)
         {
             Raylib.DrawRectangle(drawX + 3, drawY + 3, GameScene.CELL_SIZE - 6, 3, Raylib.ColorAlpha(Raylib.WHITE, 0.3f));
@@ -57,6 +64,7 @@ namespace Tetris
             Raylib.DrawRectangle(drawX + 3, drawY + GameScene.CELL_SIZE - 6, GameScene.CELL_SIZE - 6, 3, Raylib.ColorAlpha(Raylib.BLACK, 0.3f));
         }
 
+        // Draws the entire Tetromino
         public void DrawTetromino()
         {
             for (int i = 0; i < shape.GetLength(0); i++)
@@ -73,6 +81,7 @@ namespace Tetris
             }
         }
 
+        // Draws the next Tetromino in the preview area
         public void DrawNextTetromino(int x, int y)
         {
             for (int i = 0; i < shape.GetLength(0); i++)
@@ -94,7 +103,7 @@ namespace Tetris
             }
         }
 
-
+        // Draws the shadow of the Tetromino
         public void DrawShadowTetromino()
         {
             int shadowY = y;
@@ -116,6 +125,7 @@ namespace Tetris
             }
         }
 
+        // Draws the placed Tetrominoes on the grid
         public void DrawPlacedTetromino()
         {
             for (int i = 0; i < GameScene.GRID_HEIGHT; i++)
@@ -130,6 +140,7 @@ namespace Tetris
             }
         }
 
+        // Moves the Tetromino by a specified amount
         public void MoveTetromino(int dx, int dy)
         {
             int prevX = x;
@@ -145,13 +156,13 @@ namespace Tetris
             }
         }
 
+        // Moves the Tetromino randomly
         public void MoveTetrominoRandomly()
         {
             moveDelta += Raylib.GetFrameTime();
 
             if (moveDelta >= moveInterval)
             {
-
                 int random = Raylib.GetRandomValue(0, 5);
 
                 if (random == 0)
@@ -174,6 +185,7 @@ namespace Tetris
             }
         }
 
+        // Places the Tetromino at the bottom of the grid
         private void PlaceTetrominoAsBottom()
         {
             while (!CheckCollision(y + 1))
@@ -187,6 +199,7 @@ namespace Tetris
             gameScene.nextTetromino = gameScene.GenerateRandomTetromino();
         }
 
+        // Rotates the Tetromino
         public void RotateTetromino()
         {
             int[,] rotatedShape = new int[shape.GetLength(1), shape.GetLength(0)];
@@ -206,13 +219,13 @@ namespace Tetris
             {
                 shape = prevShape;
             }
-            
             else
             {
                 rotation = (rotation + 1) % 4;
             }
         }
 
+        // Rotates the Tetromino a specified number of times
         public Tetromino Rotate(int rotation)
         {
             for (int i = 0; i < rotation; i++)
@@ -222,11 +235,13 @@ namespace Tetris
             return this;
         }
 
+        // Clones the Tetromino
         public Tetromino Clone()
         {
             return new Tetromino(gameScene, x, y, shape, color);
         }
 
+        // Moves the Tetromino to a specified position with a specified rotation and speed
         public void MoveTo(int x, int y, int rotation, bool ultraSpeed)
         {
             int deltaX = x - this.x;
@@ -245,7 +260,7 @@ namespace Tetris
                 MoveTetromino(0, deltaY);
         }
 
-
+        // Places the Tetromino on the grid
         private void PlaceBlock()
         {
             for (int i = 0; i < shape.GetLength(0); i++)
@@ -269,6 +284,7 @@ namespace Tetris
             Raylib.PlaySound(SoundManager.blockplace);
         }
 
+        // Checks for collision with the grid or other Tetrominoes
         public bool CheckCollision(int? newY = null)
         {
             int checkY = newY ?? y;
@@ -293,6 +309,7 @@ namespace Tetris
             return false;
         }
 
+        // Updates the Tetromino's position based on the fall speed
         public void Update()
         {
             fallDelta += Raylib.GetFrameTime() * fallSpeed;
@@ -314,11 +331,13 @@ namespace Tetris
             }
         }
 
+        // Sets the fall speed of the Tetromino
         private void SetFallSpeed(float fallSpeed)
         {
             this.fallSpeed = fallSpeed * gameScene.level / 1.2f;
         }
 
+        // Handles user input for controlling the Tetromino
         public void HandleInput()
         {
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_UP))

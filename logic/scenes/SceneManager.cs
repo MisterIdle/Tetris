@@ -1,23 +1,20 @@
-namespace Tetris
+namespace Tetris.Scene
 {
     public static class SceneManager
     {
         private static Scene currentScene;
 
+        // Sets the current scene and loads it.
         public static void SetScene(Scene scene)
         {
             currentScene = scene;
             currentScene.LoadScene();
         }
 
-        public static void UpdateScene()
-        {
-            currentScene?.UpdateScene();
-        }
+        // Updates the current scene.
+        public static void UpdateScene() => currentScene?.UpdateScene();
 
-        public static void DrawScene()
-        {
-            currentScene?.DrawScene();
-        }
+        // Draws the current scene.
+        public static void DrawScene() => currentScene?.DrawScene();
     }
 }

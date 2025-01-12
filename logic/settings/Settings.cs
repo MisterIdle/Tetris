@@ -2,18 +2,18 @@ using System;
 using Newtonsoft.Json;
 using System.IO;
 
-namespace Tetris {
+using Tetris.Audio;
+
+namespace Tetris.Options {
     public static class Settings {
         public static bool shadow = true;
         public static bool placedBlocks = true;
         public static bool nextBlock = true;
         public static bool randomMovement = false;
+        public static int level = 1;
 
         public static bool normal = true;
         public static bool gnowius = false;
-        public static bool custom = false;
-
-        public static int level = 1;
 
         public static float masterVolume = 1.0f;
         public static float musicVolume = 1.0f;
@@ -22,11 +22,13 @@ namespace Tetris {
         private static readonly string directoryPath = "json";
         private static readonly string filePath = Path.Combine(directoryPath, "settings.json");
 
+        // Toggles the value of the given boolean and saves the settings.
         public static void Switch(ref bool value) {
             value = !value;
             SaveSettings();
         }
 
+        // Saves the current settings to a JSON file.
         public static void SaveSettings() {
             if (!Directory.Exists(directoryPath)) {
                 Directory.CreateDirectory(directoryPath);
@@ -37,18 +39,22 @@ namespace Tetris {
                 placedBlocks = placedBlocks,
                 nextBlock = nextBlock,
                 randomMovement = randomMovement,
+
                 level = level,
+
                 normal = normal,
                 gnowius = gnowius,
-                custom = custom,
+
                 masterVolume = masterVolume,
                 musicVolume = musicVolume,
                 sfxVolume = sfxVolume
+
             }, Formatting.Indented);
 
             File.WriteAllText(filePath, json);
         }
 
+        // Loads the settings from a JSON file.
         public static void LoadSettings() {
             if (!Directory.Exists(directoryPath)) {
                 Directory.CreateDirectory(directoryPath);
@@ -67,10 +73,11 @@ namespace Tetris {
                 placedBlocks = data.placedBlocks;
                 nextBlock = data.nextBlock;
                 randomMovement = data.randomMovement;
+                
                 level = data.level;
                 normal = data.normal;
                 gnowius = data.gnowius;
-                custom = data.custom;
+
                 masterVolume = data.masterVolume;
                 musicVolume = data.musicVolume;
                 sfxVolume = data.sfxVolume;
@@ -85,6 +92,7 @@ namespace Tetris {
             }
         }
 
+        // Represents the settings data structure for serialization.
         public class SettingsData {
             public bool shadow { get; set; }
             public bool placedBlocks { get; set; }
