@@ -33,6 +33,9 @@ namespace Tetris
                 case GameState.Menu:
                     SceneManager.SetScene(new GameMenu(this));
                     break;
+                case GameState.Continue:
+                    SceneManager.SetScene(new GameScene(this));
+                    break;
                 case GameState.Loading:
                     SceneManager.SetScene(new GameScene(this));
                     break;

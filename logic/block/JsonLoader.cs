@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using Raylib_CsLo;  
 
 namespace Tetris {
-    class JsonLoader
+    public class JsonLoader
     {
         public static List<Tetromino> LoadFromJson(string filePath)
         {

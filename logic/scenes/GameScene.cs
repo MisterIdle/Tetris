@@ -34,11 +34,11 @@ namespace Tetris
         private Color quitButtonColor = new Color(125, 75, 75, 255);
         private Color quitButtonOverColor = new Color(110, 65, 65, 255);
 
-        private int score = 0;
+        public int score = 0;
         private int scoreMultiplier = 1;
 
         public int level = 1;
-        private int lines = 0;
+        public int lines = 0;
 
         public bool aiPlaying = false;
         public bool iaPlayingUltraSpeed = false;
@@ -56,20 +56,43 @@ namespace Tetris
 
         public override void LoadScene()
         {
-            if (gameLoop.currentState == GameState.Loading)
+            InitializeGrid();
+            ScoreMultiplier();
+            SoundManager.StopAllAudio();
+
+            if (gameLoop.currentState == GameState.Continue)
             {
-                InitializeGrid();
-                ScoreMultiplier();
+                SaveData saveData = Save.LoadGame();
 
-                SoundManager.StopAllAudio();
+                score = saveData.score;
+                level = saveData.level;
+                lines = saveData.linesCleared;
 
+                grid = saveData.grid;
+                colorGrid = saveData.colorGrid;
+
+                currentTetromino = GenerateSavedTetromino(new TetrominoData
+                {
+                    Shape = saveData.currentBlock.shape,
+                    Color = new int[] { saveData.currentBlock.color.r, saveData.currentBlock.color.g, saveData.currentBlock.color.b, saveData.currentBlock.color.a }
+                });
+                
+                nextTetromino = GenerateSavedTetromino(new TetrominoData
+                {
+                    Shape = saveData.nextBlock.shape,
+                    Color = new int[] { saveData.nextBlock.color.r, saveData.nextBlock.color.g, saveData.nextBlock.color.b, saveData.nextBlock.color.a }
+                });
+            }
+            
+            else if (gameLoop.currentState == GameState.Loading)
+            {
                 currentTetromino = GenerateRandomTetromino();
                 nextTetromino = GenerateRandomTetromino();
-
+    
                 level = Settings.level;
-
-                gameLoop.ChangeState(GameState.Playing);
             }
+
+            gameLoop.ChangeState(GameState.Playing);
         }
 
         public override void UpdateScene()
@@ -97,7 +120,7 @@ namespace Tetris
 
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_P) && gameLoop.currentState == GameState.Playing)
             {
-            gameLoop.ChangeState(GameState.Paused);
+                gameLoop.ChangeState(GameState.Paused);
             }
 
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_F9))
@@ -232,8 +255,6 @@ namespace Tetris
                     RemoveLine(i);
                     MoveLinesDown(i);
 
-                    Console.WriteLine("Line " + i + " cleared");
-
                     i++;
                 }
             }
@@ -290,19 +311,17 @@ namespace Tetris
             var random = new Random();
             List<Tetromino> combinedBlocks = new List<Tetromino>();
 
+            string pathNormal = "json/block/blocks.json";
+            string pathGnowius = "json/block/gnowius.json";
+
             if (Settings.normal)
             {
-                combinedBlocks.AddRange(JsonLoader.LoadFromJson("json/blocks.json"));
+                combinedBlocks.AddRange(JsonLoader.LoadFromJson(pathNormal));
             }
 
             if (Settings.gnowius)
             {
-                combinedBlocks.AddRange(JsonLoader.LoadFromJson("json/gnowius.json"));
-            }
-
-            if (combinedBlocks.Count == 0)
-            {
-                throw new InvalidOperationException("No Tetromino configuration is active.");
+                combinedBlocks.AddRange(JsonLoader.LoadFromJson(pathGnowius));
             }
 
             int index = random.Next(combinedBlocks.Count);
@@ -314,6 +333,17 @@ namespace Tetris
                 0,
                 randomBlock.shape,
                 randomBlock.color
+            );
+        }
+
+        public Tetromino GenerateSavedTetromino(TetrominoData tetrominoData)
+        {
+            return new Tetromino(
+                this,
+                GRID_WIDTH / 2 - tetrominoData.Shape.GetLength(1) / 2,
+                0,
+                tetrominoData.Shape,
+                new Color(tetrominoData.Color[0], tetrominoData.Color[1], tetrominoData.Color[2], tetrominoData.Color[3])
             );
         }
 
@@ -424,13 +454,17 @@ namespace Tetris
             {
                 gameLoop.ChangeState(GameState.Playing);
             });
+            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 180, GameLoop.SCREEN_HEIGHT / 2 + 20, 200, 50, "SAVE", 20, menuButtonColor, menuButtonOverColor, textColor, gameLoop.font, () =>
+            {
+                Save.SaveGame(this);
+            });
 
-            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 180, GameLoop.SCREEN_HEIGHT / 2 + 20, 200, 50, "MAIN MENU", 20, menuButtonColor, menuButtonOverColor, textColor, gameLoop.font, () =>
+            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 180, GameLoop.SCREEN_HEIGHT / 2 + 90, 200, 50, "MAIN MENU", 20, menuButtonColor, menuButtonOverColor, textColor, gameLoop.font, () =>
             {
                 gameLoop.ChangeState(GameState.Menu);
             });
 
-            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 180, GameLoop.SCREEN_HEIGHT / 2 + 150, 200, 50, "QUIT GAME", 20, quitButtonColor, quitButtonOverColor, textColor, gameLoop.font, () =>
+            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 180, GameLoop.SCREEN_HEIGHT / 2 + 200, 200, 50, "QUIT GAME", 20, quitButtonColor, quitButtonOverColor, textColor, gameLoop.font, () =>
             {
                 Raylib.CloseWindow();
             });

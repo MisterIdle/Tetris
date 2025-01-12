@@ -1,0 +1,13 @@
+{
+  "shadow": true,
+  "placedBlocks": true,
+  "nextBlock": true,
+  "randomMovement": false,
+  "level": 1,
+  "normal": true,
+  "gnowius": false,
+  "custom": false,
+  "masterVolume": 1.0,
+  "musicVolume": 1.0,
+  "sfxVolume": 1.0
+}

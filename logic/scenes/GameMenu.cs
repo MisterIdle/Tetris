@@ -140,8 +140,13 @@ namespace Tetris {
         }
 
         private void DrawMain() {
-            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 190 / 2, 200, 200, 50, "Play", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
+            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 190 / 2, 130, 200, 50, "Play", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
                 StartTransition(MenuState.Play);
+            });
+
+            CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 190 / 2, 200, 200, 50, "Continue", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
+                Animation.FadeOut(1);
+                gameLoop.ChangeState(GameState.Continue);
             });
 
             CustomElements.Button(GameLoop.SCREEN_WIDTH / 2 - 190 / 2, 270, 200, 50, "Settings", 20, menuButtonColor, menuButtonOverColor, textColor, font, () => {
